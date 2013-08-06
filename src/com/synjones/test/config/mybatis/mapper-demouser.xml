@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.synjones.test.mapper.DemoUserMapper">
+	<select id="selectList" parameterType="DemoUserBean" resultType="DemoUserBean">
+		select id, name, nickname, password, birthday, gender, headpic,
+		registdate, lastlogindate, status from demo_user where 1 = 1
+		<if test="id!=null">
+			and id = #{id,jdbcType=VARCHAR}
+		</if>
+		<if test="name!=null">
+			and name = #{name,jdbcType=VARCHAR}
+		</if>
+		<if test="nickname!=null">
+			and nickname = #{nickname,jdbcType=VARCHAR}
+		</if>
+		<if test="password!=null">
+			and password = #{password,jdbcType=VARCHAR}
+		</if>
+		<if test="birthday!=null">
+			and birthday = #{birthday,jdbcType=TIMESTAMP}
+		</if>
+		<if test="gender!=null">
+			and gender = #{gender,jdbcType=VARCHAR}
+		</if>
+		<if test="headpic!=null">
+			and headpic = #{headpic,jdbcType=VARCHAR}
+		</if>
+		<if test="registdate!=null">
+			and registdate = #{registdate,jdbcType=TIMESTAMP}
+		</if>
+		<if test="lastlogindate!=null">
+			and lastlogindate = #{lastlogindate,jdbcType=TIMESTAMP}
+		</if>
+		<if test="status!=null">
+			and status = #{status,jdbcType=VARCHAR}
+		</if>
+	</select>
+
+	<insert id="insert" parameterType="DemoUserBean">
+		insert into demo_user (id,
+		name, nickname, password,
+		birthday, gender,
+		headpic, registdate,
+		lastlogindate, status)
+		values
+		(seq_demo_user.nextVal,
+		#{name,jdbcType=VARCHAR},
+		#{nickname,jdbcType=VARCHAR},
+		#{password,jdbcType=VARCHAR},
+		#{birthday,jdbcType=TIMESTAMP},
+		#{gender,jdbcType=VARCHAR},
+		#{headpic,jdbcType=VARCHAR},
+		#{registdate,jdbcType=TIMESTAMP},
+		#{lastlogindate,jdbcType=TIMESTAMP},
+		#{status,jdbcType=VARCHAR})
+	</insert>
+
+	<update id="update" parameterType="DemoUserBean">
+		update demo_user set id = #{id}
+		<if test="name!=null">
+			,name = #{name,jdbcType=VARCHAR}
+		</if>
+		<if test="nickname!=null">
+			,nickname = #{nickname,jdbcType=VARCHAR}
+		</if>
+		<if test="password!=null">
+			,password = #{password,jdbcType=VARCHAR}
+		</if>
+		<if test="birthday!=null">
+			,birthday = #{birthday,jdbcType=TIMESTAMP}
+		</if>
+		<if test="gender!=null">
+			,gender = #{gender,jdbcType=VARCHAR}
+		</if>
+		<if test="headpic!=null">
+			,headpic = #{headpic,jdbcType=VARCHAR}
+		</if>
+		<if test="registdate!=null">
+			,registdate = #{registdate,jdbcType=TIMESTAMP}
+		</if>
+		<if test="lastlogindate!=null">
+			,lastlogindate = #{lastlogindate,jdbcType=TIMESTAMP}
+		</if>
+		<if test="status!=null">
+			,status = #{status,jdbcType=VARCHAR}
+		</if>
+		where id = #{id}
+	</update>
+</mapper>
