@@ -1,9 +1,8 @@
 package com.synjones.test.demo.user.service;
 
-import java.util.List;
-
 import com.synjones.test.bean.DemoUserBean;
 
+import framework.base.common.Pager;
 import framework.base.service.IBaseService;
 
 /**
@@ -23,7 +22,7 @@ public interface IUserService extends IBaseService
 	 * @return
 	 * 
 	 */
-	public List<DemoUserBean> getList(DemoUserBean user);
+	public Pager<DemoUserBean> getPageList(DemoUserBean user,Pager<DemoUserBean> pager);
 
 	/**
 	 * 查询单个用户

@@ -1,7 +1,5 @@
 package com.synjones.test.demo.user.controller;
 
-import java.util.List;
-
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -11,6 +9,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import com.synjones.test.bean.DemoUserBean;
 import com.synjones.test.demo.user.service.IUserService;
 
+import framework.base.annotation.LogInfo;
+import framework.base.common.Pager;
 import framework.base.controller.BaseController;
 import framework.base.utils.JavaBeanUtil;
 
@@ -27,7 +27,7 @@ public class UserController extends BaseController
 {
 
 	private static final long serialVersionUID = 1L;
-	
+
 	@Autowired
 	private IUserService userService;
 
@@ -40,15 +40,19 @@ public class UserController extends BaseController
 	 * 
 	 */
 	@RequestMapping("/list")
+	@LogInfo("aaa")
 	public String list()
 	{
 		DemoUserBean search = new DemoUserBean();
-		search.setId("1");
-		search.setName("admin");
+		// search.setId(1);
+		// search.setName("admin");
 
-		List<DemoUserBean> userList = userService.getList(null);
-		logger.debug("userlist:" + JavaBeanUtil.toString(userList));
-		request.setAttribute("userList", userList);
+		Pager<DemoUserBean> pager = new Pager<DemoUserBean>();
+		pager.setCountPerPage(2);
+		
+		userService.getPageList(search, pager);
+		logger.debug("userlist:" + JavaBeanUtil.toString(pager.getPageList()));
+		request.setAttribute("userList", pager.getPageList());
 		return "demoUser/user_list";
 	}
 
@@ -98,7 +102,7 @@ public class UserController extends BaseController
 	public String editUser(@PathVariable String userid)
 	{
 		DemoUserBean user = new DemoUserBean();
-		user.setId(userid);
+		user.setId(Integer.parseInt(userid));
 		user = userService.getUser(user);
 		request.setAttribute("user", user);
 

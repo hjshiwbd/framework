@@ -2,94 +2,81 @@ package framework.base.dao;
 
 import java.util.List;
 
-import framework.base.mapper.BaseMapper;
+import framework.base.common.Pager;
 
 /**
+ * 基础的dao方法:增删改查分页
  * 
  * @author hjin
- * @cratedate 2013-8-5 下午5:32:28
+ * @cratedate 2013-8-7 下午2:27:00
  * 
  */
 public interface IBaseDAO
 {
 	/**
-	 * 构建mapper
+	 * 保存对象
 	 * 
 	 * @author hjin
-	 * @cratedate 2013-8-6 下午4:50:38
-	 * @param cls
-	 * @return
-	 * 
-	 */
-	public <T extends BaseMapper> T getMapper(Class<? extends BaseMapper> cls);
-
-	/**
-	 * 查询单个对象
-	 * 
-	 * @author hjin
-	 * @cratedate 2013-8-5 下午5:38:25
-	 * @param mybatisId
+	 * @cratedate 2013-8-7 下午2:45:09
 	 * @param param
 	 * @return
 	 * 
 	 */
-	public <T> T selectOne(String mybatisId, Object param);
+	public int insert(Object param);
 
 	/**
-	 * 查询列表
+	 * 删除对象
 	 * 
 	 * @author hjin
-	 * @cratedate 2013-8-5 下午5:38:30
-	 * @param mybatisId
+	 * @cratedate 2013-8-7 下午2:45:18
 	 * @param param
 	 * @return
 	 * 
 	 */
-	public <T> List<T> selectList(String mybatisId, Object param);
-
-	/**
-	 * 插入对象
-	 * 
-	 * @author hjin
-	 * @cratedate 2013-8-6 上午10:17:47
-	 * @param param
-	 * @return
-	 * 
-	 */
-	public int insert(String mybatisId, Object param);
+	public int delete(Object param);
 
 	/**
 	 * 修改对象
 	 * 
 	 * @author hjin
-	 * @cratedate 2013-8-6 下午4:51:26
-	 * @param mybatisId
+	 * @cratedate 2013-8-7 下午2:45:40
 	 * @param param
 	 * @return
 	 * 
 	 */
-	public int update(String mybatisId, Object param);
+	public int update(Object param);
 
 	/**
-	 * 删除
+	 * 列表查询
 	 * 
 	 * @author hjin
-	 * @cratedate 2013-8-6 下午4:51:46
-	 * @param mybatisId
+	 * @cratedate 2013-8-7 下午2:45:36
 	 * @param param
 	 * @return
 	 * 
 	 */
-	public int delete(String mybatisId, Object param);
+	public <E> List<E> selectList(Object param);
 
 	/**
-	 * 查询行数
+	 * 单对象查询
 	 * 
 	 * @author hjin
-	 * @cratedate 2013-8-6 下午4:55:59
-	 * @param sql
+	 * @cratedate 2013-8-7 下午2:45:28
+	 * @param param
 	 * @return
 	 * 
 	 */
-	public int selectCount(String sql,Object... param);
+	public <T> T selectOne(Object param);
+
+	/**
+	 * 分页查询
+	 * 
+	 * @author hjin
+	 * @cratedate 2013-8-7 下午2:45:24
+	 * @param param
+	 * @param pager
+	 * @return
+	 * 
+	 */
+	public <E> Pager<E> selectPage(Object param, Pager<E> pager);
 }

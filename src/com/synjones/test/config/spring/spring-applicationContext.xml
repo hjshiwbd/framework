@@ -1,0 +1,117 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:context="http://www.springframework.org/schema/context" xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:mvc="http://www.springframework.org/schema/mvc" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:aop="http://www.springframework.org/schema/aop" xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:jee="http://www.springframework.org/schema/jee"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+		http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+    	http://www.springframework.org/schema/context
+    	http://www.springframework.org/schema/context/spring-context.xsd
+    	http://www.springframework.org/schema/mvc
+    	http://www.springframework.org/schema/mvc/spring-mvc-3.0.xsd
+    	http://www.springframework.org/schema/tx
+    	http://www.springframework.org/schema/tx/spring-tx.xsd
+		http://www.springframework.org/schema/aop
+		http://www.springframework.org/schema/aop/spring-aop.xsd
+		http://www.springframework.org/schema/jee     
+        http://www.springframework.org/schema/jee/spring-jee-2.5.xsd">
+        
+	<!-- spring 注入注解支持 -->
+	<context:annotation-config />
+	
+	<!-- properties文件 -->
+	<bean id="propertyConfigurer"
+		class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		<property name="locations">
+			<list>
+				<value>classpath:com/synjones/test/config/properties/project.properties
+				</value>
+			</list>
+		</property>
+	</bean>
+
+	<!-- 容器数据源(tomcat,weblog通配) -->
+	<jee:jndi-lookup id="dataSource" jndi-name="${database.dbname}"
+		resource-ref="true" />
+
+	<!-- 连接池数据源 <bean id="dataSource" class="org.springframework.jndi.JndiObjectFactoryBean"> 
+		<property name="jndiName" value="${dbname}" /> <property name="expectedType" 
+		value="javax.sql.DataSource" /> </bean> -->
+
+	<!-- jdbc数据源 <bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource"> 
+		<property name="driverClassName"> <value>${jdbc.driver}</value> </property> 
+		<property name="url"> <value>${jdbc.url}</value> </property> <property name="username"> 
+		<value>${jdbc.username}</value> </property> <property name="password"> <value>${jdbc.password}</value> 
+		</property> </bean> -->
+
+	<!-- 事务 -->
+	<bean id="transactionManager"
+		class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource" ref="dataSource" />
+	</bean>
+	<!-- 声明使用注解式事务,与配置型事务二选一 -->
+	<!-- <tx:annotation-driven transaction-manager="transactionManager"/> -->
+
+	<!-- 配置型定义事务通知 -->
+	<tx:advice id="txAdvice" transaction-manager="transactionManager">
+		<!-- 定义方法的过滤规则 -->
+		<tx:attributes>
+			<tx:method name="add*" propagation="REQUIRED" rollback-for="Throwable" />
+			<tx:method name="edit*" propagation="REQUIRED"
+				rollback-for="Throwable" />
+			<tx:method name="remove*" propagation="REQUIRED"
+				rollback-for="Throwable" />
+			<tx:method name="save*" propagation="REQUIRED"
+				rollback-for="Throwable" />
+			<tx:method name="insert*" propagation="REQUIRED"
+				rollback-for="Throwable" />
+			<tx:method name="delete*" propagation="REQUIRED"
+				rollback-for="Throwable" />
+			<tx:method name="update*" propagation="REQUIRED"
+				rollback-for="Throwable" />
+			<!-- 当抛出Exception时事务回滚 -->
+			<tx:method name="*" read-only="true" rollback-for="Exception" />
+		</tx:attributes>
+	</tx:advice>
+	<!-- 定义AOP配置 -->
+	<aop:config>
+		<!-- 定义一个切入点 -->
+		<aop:pointcut
+			expression="execution (* com.synjones.test.*.service.impl.*.*(..)) || execution (* com.synjones.test.*.*.service.impl.*.*(..))"
+			id="services" />
+		<!-- 对切入点和事务的通知，进行适配 -->
+		<aop:advisor advice-ref="txAdvice" pointcut-ref="services" />
+	</aop:config>
+	<!-- 配置型定义事务通知 end -->
+
+	<!-- MyBatis配置 -->
+	<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+		<!-- 数据源 -->
+		<property name="dataSource" ref="dataSource" />
+		<!-- 基础配置 -->
+		<property name="configLocation"
+			value="classpath:com/synjones/test/config/mybatis/mybatis-config.xml" />
+		<!-- mapper配置 -->
+		<property name="mapperLocations"
+			value="classpath:com/synjones/test/config/mybatis/mapper-*.xml" />
+		<!-- 映射包 -->
+		<property name="typeAliasesPackage" value="com.synjones.test.bean" />
+	</bean>
+
+	<bean id="sqlSessionTemplate" class="org.mybatis.spring.SqlSessionTemplate">
+		<constructor-arg index="0" ref="sqlSessionFactory" />
+	</bean>
+
+	<bean id="jdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate">
+		<property name="dataSource" ref="dataSource"></property>
+	</bean>
+
+	<bean class="framework.base.dao.impl.BaseDAOSupportImpl">
+		<property name="sqlSessionTemplate" ref="sqlSessionTemplate"></property>
+		<property name="jdbcTemplate" ref="jdbcTemplate"></property>
+	</bean>
+	<!-- MyBatis配置 end -->
+
+	<!-- 异常处理 -->
+	<bean class="framework.base.exception.BaseExceptionHandler"></bean>
+</beans>

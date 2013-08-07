@@ -5,11 +5,11 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
-import com.synjones.test.bean.DemoUserBean;
 import com.synjones.test.demo.user.dao.IUserDAO;
 import com.synjones.test.mapper.DemoUserMapper;
 
-import framework.base.dao.IBaseDAO;
+import framework.base.common.Pager;
+import framework.base.dao.IBaseDAOSupport;
 
 /**
  * 
@@ -18,32 +18,50 @@ import framework.base.dao.IBaseDAO;
  * 
  */
 @Repository
+@SuppressWarnings("unused")
 public class UserDAOImpl implements IUserDAO
 {
 	@Autowired
-	private IBaseDAO baseDAO;
+	private IBaseDAOSupport daoSupport;
 
-	public DemoUserMapper getMapper()
+    private DemoUserMapper getMapper()
 	{
-		return baseDAO.getMapper(DemoUserMapper.class);
+		return daoSupport.getMapper(DemoUserMapper.class);
 	}
 
-	public List<DemoUserBean> getList(DemoUserBean user)
+	private String getMapperPrefix()
 	{
-		// return baseDAO.selectList(
-		// "com.synjones.test.mapper.DemoUserMapper.selectList", user);
-		return getMapper().selectList(user);
+		return DemoUserMapper.class.getName() + ".";
 	}
 
-	public void saveUser(DemoUserBean user)
+	public int insert(Object param)
 	{
-		// baseDAO.insert("com.synjones.test.mapper.DemoUserMapper.insert",
-		// user);
-		getMapper().insert(user);
+		return daoSupport.insert(getMapperPrefix() + "insert", param);
 	}
 
-	public void updateUser(DemoUserBean user)
+	public int delete(Object param)
 	{
-		getMapper().update(user);
+		return daoSupport.delete(getMapperPrefix() + "delete", param);
 	}
+
+	public int update(Object param)
+	{
+		return daoSupport.update(getMapperPrefix() + "update", param);
+	}
+
+	public <E> List<E> selectList(Object param)
+	{
+		return daoSupport.selectList(getMapperPrefix() + "selectList", param);
+	}
+
+	public <T> T selectOne(Object param)
+	{
+		return daoSupport.selectOne(getMapperPrefix() + "selectList", param);
+	}
+
+	public <E> Pager<E> selectPage(Object param, Pager<E> pager)
+	{
+		return daoSupport.selectPage(getMapperPrefix() + "selectList", param, pager);
+	}
+
 }

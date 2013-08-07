@@ -9,7 +9,7 @@ package com.synjones.test.bean;
  */
 public class DemoUserBean
 {
-	private String id;// 主键
+	private Integer id;// 主键
 	private String name;// 用户名
 	private String nickname;// 昵称
 	private String password;// 密码
@@ -20,12 +20,12 @@ public class DemoUserBean
 	private java.util.Date lastlogindate;// 最近登录日期
 	private String status;// 状态.0否1是
 
-	public String getId()
+	public Integer getId()
 	{
 		return id;
 	}
 
-	public void setId(String id)
+	public void setId(Integer id)
 	{
 		this.id = id;
 	}

@@ -59,7 +59,7 @@
 		<appender-ref ref="logErrorFile" />
 	</logger>
 	<root>
-		<level value="info" />
+		<level value="debug" />
 		<appender-ref ref="stdout" />
 		<appender-ref ref="logInfoFile" />
 		<appender-ref ref="logErrorFile" />

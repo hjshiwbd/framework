@@ -9,7 +9,7 @@ import com.synjones.test.bean.DemoUserBean;
 import com.synjones.test.demo.user.dao.IUserDAO;
 import com.synjones.test.demo.user.service.IUserService;
 
-import framework.base.exception.BaseException;
+import framework.base.common.Pager;
 import framework.base.service.impl.BaseServiceImpl;
 
 /**
@@ -34,9 +34,9 @@ public class UserServiceImpl extends BaseServiceImpl implements IUserService
 	 * @return
 	 * 
 	 */
-	public List<DemoUserBean> getList(DemoUserBean user)
+	public List<DemoUserBean> getPageList(DemoUserBean user)
 	{
-		return userDAO.getList(user);
+		return userDAO.selectList(user);
 	}
 
 	/**
@@ -49,7 +49,7 @@ public class UserServiceImpl extends BaseServiceImpl implements IUserService
 	 */
 	public void saveUser(DemoUserBean user)
 	{
-		userDAO.saveUser(user);
+		userDAO.insert(user);
 	}
 
 	/**
@@ -63,23 +63,7 @@ public class UserServiceImpl extends BaseServiceImpl implements IUserService
 	 */
 	public DemoUserBean getUser(DemoUserBean user)
 	{
-		List<DemoUserBean> users = getList(user);
-		if (users != null)
-		{
-			if (users.size() == 1)
-			{
-				return users.get(0);
-			}
-			else
-			{
-				throw new BaseException(
-				        "more than 1 row result found, expected one");
-			}
-		}
-		else
-		{
-			throw new BaseException("no result found, expected one");
-		}
+		return userDAO.selectOne(user);
 	}
 
 	/**
@@ -92,7 +76,13 @@ public class UserServiceImpl extends BaseServiceImpl implements IUserService
 	 */
 	public void updateUser(DemoUserBean user)
 	{
-		userDAO.updateUser(user);
+		userDAO.update(user);
+	}
+
+	public Pager<DemoUserBean> getPageList(DemoUserBean user,
+	        Pager<DemoUserBean> pager)
+	{
+		return userDAO.selectPage(user, pager);
 	}
 
 }
