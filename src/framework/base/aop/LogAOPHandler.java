@@ -17,6 +17,7 @@ import framework.base.annotation.LogInfo;
  * 
  */
 @Aspect
+@Component
 public class LogAOPHandler
 {
 	private Logger logger = LoggerFactory.getLogger(getClass());
@@ -31,11 +32,12 @@ public class LogAOPHandler
 	 * @throws Throwable
 	 * 
 	 */
-	@After("(execution(* com.synjones.test.*.controller.*.*(..)) || execution(* com.synjones.test.*.*.controller.*.*(..)))")
+	@After("(execution(* com.synjones.test.*.controller.*.*(..)) || execution(* com.synjones.test.*.*.controller.*.*(..))) && @annotation(logInfo)")
+//	@After("execution(* com.synjones.test.*.*.controller.*.*(..)) && @annotation(logInfo)")
 //	@After("execution(@framework.base.annotation.LogInfo * *(..))")
 //	@AfterReturning("within(com.synjones.test.demo.user..*)")
 //	@AfterReturning("within(com.abchina.irms..*) && @annotation(rl)")  
-	public void logHandler(JoinPoint jp) throws Throwable
+	public void logHandler(JoinPoint jp,LogInfo logInfo) throws Throwable
 	{
 		// 类名
 		String className = jp.getTarget().getClass().getSimpleName();
@@ -43,6 +45,6 @@ public class LogAOPHandler
 		String signature = jp.getSignature().toString();
 		String methodName = signature.substring(signature.lastIndexOf(".") + 1);
 
-		logger.info("cutpoint=" + className + "." + methodName);
+		logger.info("cutpoint=" + className + "." + methodName + ",loginfo=" + logInfo.value());
 	}
 }
