@@ -36,7 +36,7 @@ public class GenerateJavaBeanFile
 		String beanFileName = "DemoUserBean";
 		// 创建文件包名
 		// String packageName = "com.synjones.iaweb.user.bean";
-		String packageName = "com.synjones.test.bean";
+		String packageName = "demo.bean";
 		createBeanFile(tableName, beanFileName, packageName);
 	}
 

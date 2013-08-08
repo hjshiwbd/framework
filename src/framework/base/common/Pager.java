@@ -138,7 +138,7 @@ public class Pager<T> extends PageBounds implements Serializable
 	{
 		if (getTotalPage() > 0 && curtPage > getTotalPage())
 		{
-			curtPage = getTotal();
+			curtPage = getTotalPage();
 		}
 		if (curtPage < 1)
 		{
