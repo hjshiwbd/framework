@@ -105,9 +105,11 @@ public class UserController extends BaseController
 	@RequestMapping("/edit/{userid}")
 	public String editUser(@PathVariable String userid)
 	{
+		logger.info("userid:" + userid);
 		DemoUserBean user = new DemoUserBean();
 		user.setId(Integer.parseInt(userid));
 		user = userService.getUser(user);
+		logger.info("show user:" + JavaBeanUtil.toString(user));
 		request.setAttribute("user", user);
 
 		return folderName + "user_edit";
@@ -129,7 +131,7 @@ public class UserController extends BaseController
 		userService.updateUser(user);
 		logger.info("update user successfully");
 
-		return "redirect:/user/edit/" + user.getId();
+		return "redirect:/user/list/1";
 	}
 
 	@Override

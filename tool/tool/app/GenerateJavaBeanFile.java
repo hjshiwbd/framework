@@ -197,6 +197,6 @@ public class GenerateJavaBeanFile
 		String sid = "whut";
 		String username = "ssc2";
 		String password = "ssc2";
-		conn = ConnUtils.getConn(ip, port, sid, username, password);
+		conn = ConnUtils.getOracleConn(ip, port, sid, username, password);
 	}
 }

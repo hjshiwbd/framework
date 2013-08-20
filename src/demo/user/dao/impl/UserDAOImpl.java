@@ -51,17 +51,17 @@ public class UserDAOImpl implements IUserDAO
 
 	public <E> List<E> selectList(Object param)
 	{
-		return daoSupport.selectList(getMapperPrefix() + "selectList", param);
+		return daoSupport.selectList(getMapperPrefix() + "select", param);
 	}
 
 	public <T> T selectOne(Object param)
 	{
-		return daoSupport.selectOne(getMapperPrefix() + "selectList", param);
+		return daoSupport.selectOne(getMapperPrefix() + "select", param);
 	}
 
 	public <E> Pager<E> selectPage(Object param, Pager<E> pager)
 	{
-		return daoSupport.selectPage(getMapperPrefix() + "selectList", param, pager);
+		return daoSupport.selectPage(getMapperPrefix() + "select", param, pager);
 	}
 
 }

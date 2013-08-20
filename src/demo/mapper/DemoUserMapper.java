@@ -14,7 +14,7 @@ import framework.base.mapper.BaseMapper;
  */
 public interface DemoUserMapper extends BaseMapper
 {
-	public List<DemoUserBean> selectList(Object param);
+	public List<DemoUserBean> select(Object param);
 
 	public int insert(DemoUserBean user);
 	
