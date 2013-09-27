@@ -1,8 +1,11 @@
 package framework.base.dao.impl;
 
+import java.util.Arrays;
 import java.util.List;
 
 import org.mybatis.spring.support.SqlSessionDaoSupport;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import com.github.miemiedev.mybatis.paginator.domain.Order;
@@ -20,8 +23,10 @@ import framework.base.mapper.BaseMapper;
  * 
  */
 public class BaseDAOSupportImpl extends SqlSessionDaoSupport implements
-        IBaseDAOSupport
+		IBaseDAOSupport
 {
+	private Logger logger = LoggerFactory.getLogger(getClass());
+	
 	private JdbcTemplate jdbcTemplate;
 
 	public void setJdbcTemplate(JdbcTemplate jdbcTemplate)
@@ -127,8 +132,14 @@ public class BaseDAOSupportImpl extends SqlSessionDaoSupport implements
 	 * @return
 	 * 
 	 */
-	public int selectCount(String sql, Object... param)
+	public int selectCount(String table, String where, Object... param)
 	{
+		String sql = "select count(1) from " + table + where;
+		if (logger.isDebugEnabled())
+		{
+			logger.debug("select count sql:" + sql);
+			logger.debug("select count param:" + Arrays.toString(param));
+		}
 		return jdbcTemplate.queryForObject(sql, Integer.class, param);
 	}
 
@@ -145,12 +156,12 @@ public class BaseDAOSupportImpl extends SqlSessionDaoSupport implements
 	 * 
 	 */
 	public <E> Pager<E> selectPage(String mybatisId, Object param,
-	        Pager<E> pager)
+			Pager<E> pager)
 	{
 		// 构建PageBounds查询对象
 		PageBounds pageBounds = new PageBounds(pager.getCurtPage(),
-		        pager.getCountPerPage(), Order.formString(pager.getOrderby()),
-		        pager.isContainsTotalCount());
+				pager.getCountPerPage(), Order.formString(pager.getOrderby()),
+				pager.isContainsTotalCount());
 
 		// 查列表
 		List<E> list = getSqlSession().selectList(mybatisId, param, pageBounds);

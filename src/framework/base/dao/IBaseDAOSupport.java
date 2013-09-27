@@ -106,5 +106,5 @@ public interface IBaseDAOSupport
 	 * @return
 	 * 
 	 */
-	public int selectCount(String sql, Object... param);
+	public int selectCount(String table,String where, Object... param);
 }

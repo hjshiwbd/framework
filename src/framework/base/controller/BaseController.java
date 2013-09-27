@@ -1,17 +1,24 @@
 package framework.base.controller;
 
+import java.io.IOException;
 import java.io.Serializable;
+import java.util.HashMap;
+import java.util.Map;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 
 import org.slf4j.Logger;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.servlet.ModelAndView;
 
+import com.googlecode.jsonplugin.JSONException;
+import com.googlecode.jsonplugin.JSONUtil;
+
 import framework.base.common.BaseConstants;
+import framework.base.common.BaseConstants.CacheKey;
+import framework.base.common.BaseConstants.CommonPageParam;
+import framework.base.utils.PublicCacheUtil;
 
 /**
  * 
@@ -26,47 +33,25 @@ public abstract class BaseController implements Serializable
 	 * @description
 	 */
 	private static final long serialVersionUID = -3740647827551448127L;
+	protected String controllerSuffix;
+
 	/**
-	 * request
+	 * @return the controllerSuffix
 	 */
-	protected HttpServletRequest request;
-	/**
-	 * response
-	 */
-	protected HttpServletResponse response;
-	/**
-	 * session
-	 */
-	protected HttpSession session;
+	@ModelAttribute
+	public void _init()
+	{
+		controllerSuffix = PublicCacheUtil
+		        .getString(CacheKey.GLOBAL_CONTROLLER_SUFFIX);
+	}
+
 	/**
 	 * 日志对象
 	 */
 	protected Logger logger;
-	/**
-	 * model对象
-	 */
-	protected ModelAndView model = new ModelAndView();
 
 	/**
-	 * 初始化参数
-	 * 
-	 * @author hjin
-	 * @cratedate 2013-8-6 下午4:28:29
-	 * @param request
-	 * @param response
-	 * 
-	 */
-	@ModelAttribute
-	public void setReqRespSession(HttpServletRequest request,
-			HttpServletResponse response)
-	{
-		this.request = request;
-		this.response = response;
-		this.session = request.getSession();
-	}
-
-	/**
-	 * 初始化日志对象,在子类中进行实现,以子类的class进行初始化
+	 * 初始化日志对象,在子类中实现,以子类的class进行初始化
 	 * 
 	 * @author hjin
 	 * @cratedate 2013-8-6 下午4:28:53
@@ -75,22 +60,103 @@ public abstract class BaseController implements Serializable
 	@ModelAttribute
 	public abstract void setLogger();
 
-	public Logger getLogger()
+	/**
+	 * 返回通用成功页面
+	 * 
+	 * @author hjin
+	 * @cratedate 2013-8-20 上午10:25:23
+	 * @param msg
+	 * @param continueUrl
+	 * @return
+	 * 
+	 */
+	public ModelAndView createOkModel(ModelAndView model, String msg,
+	        String continueUrl)
 	{
-		return logger;
-	}
-
-	public ModelAndView returnOk(String msg, String continueUrl)
-	{
-		ModelAndView m = new ModelAndView("common/common_result");
+		ModelAndView m = model != null ? model : new ModelAndView(
+		        PublicCacheUtil.getString(CommonPageParam.GLOBAL_PAGE_RESULT));
+		m.addObject(BaseConstants.CommonPageParam.PROCESS_RESULT, "1");
 		m.addObject(BaseConstants.CommonPageParam.SHOW_MSG, msg);
-		if (continueUrl != null)
-		{
-			request.setAttribute(
-					BaseConstants.CommonPageParam.PAGE_CONTINUE_URL,
-					continueUrl);
-		}
+		m.addObject(BaseConstants.CommonPageParam.PAGE_CONTINUE_URL,
+		        continueUrl);
 		return m;
 	}
 
+	/**
+	 * 返回通用失败页面
+	 * 
+	 * @author hjin
+	 * @cratedate 2013-8-20 上午10:25:23
+	 * @param msg
+	 * @param continueUrl
+	 * @return
+	 * 
+	 */
+	public ModelAndView createFailModel(ModelAndView model, String msg,
+	        String continueUrl)
+	{
+		ModelAndView m = model != null ? model : new ModelAndView(
+		        PublicCacheUtil.getString(CommonPageParam.GLOBAL_PAGE_RESULT));
+		m.addObject(BaseConstants.CommonPageParam.PROCESS_RESULT, "0");
+		m.addObject(BaseConstants.CommonPageParam.SHOW_MSG, msg);
+		m.addObject(BaseConstants.CommonPageParam.PAGE_CONTINUE_URL,
+		        continueUrl);
+		return m;
+	}
+
+	/**
+	 * 返回msg
+	 * 
+	 * @author hjin
+	 * @cratedate 2013-9-14 下午5:04:34
+	 * @param json
+	 * 
+	 */
+	public void ajaxResponse(Object responseObj, HttpServletResponse response)
+	{
+		try
+		{
+			response.setCharacterEncoding("utf-8");
+			response.getWriter().print(JSONUtil.serialize(responseObj));
+		}
+		catch (IOException e)
+		{
+			e.printStackTrace();
+		}
+		catch (JSONException e)
+		{
+			e.printStackTrace();
+		}
+	}
+
+	/**
+	 * 表示成功的jsonmap
+	 * 
+	 * @author hjin
+	 * @cratedate 2013-9-19 下午7:38:11
+	 * @return
+	 * 
+	 */
+	public Map<String, Object> createSuccessJSONMap()
+	{
+		Map<String, Object> map = new HashMap<String, Object>();
+		map.put("result", "1");
+		return map;
+	}
+
+	/**
+	 * 表示失败的jsonmap
+	 * 
+	 * @author hjin
+	 * @cratedate 2013-9-19 下午7:38:11
+	 * @return
+	 * 
+	 */
+	public Map<String, Object> createFailJSONMap(String failMsg)
+	{
+		Map<String, Object> map = new HashMap<String, Object>();
+		map.put("result", "0");
+		map.put("message", failMsg);
+		return map;
+	}
 }

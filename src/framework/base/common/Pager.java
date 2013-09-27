@@ -17,6 +17,10 @@ import framework.base.annotation.Print;
 public class Pager<T> extends PageBounds implements Serializable
 {
 	/**
+	 * @description
+	 */
+	private static final long serialVersionUID = 1L;
+	/**
 	 * 当前页
 	 */
 	private int curtPage = 1;
