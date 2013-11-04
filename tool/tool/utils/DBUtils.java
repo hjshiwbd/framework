@@ -26,6 +26,7 @@ public class DBUtils
 		List<Map<String, String>> list = new ArrayList<Map<String, String>>();
 		String sql = "select a.COLUMN_NAME,b.DATA_TYPE,a.COMMENTS from user_col_comments a, user_tab_columns b where b.TABLE_NAME(+) = a.TABLE_NAME and b.COLUMN_NAME = a.COLUMN_NAME and a.TABLE_NAME = ?";
 		System.out.println(sql);
+		System.out.println("param:" + tableName);
 		try
 		{
 			ps = conn.prepareStatement(sql);
@@ -77,7 +78,7 @@ public class DBUtils
 	{
 		List<Map<String, String>> list = new ArrayList<Map<String, String>>();
 		String sql = "select t.COLUMN_NAME,t.DATA_TYPE,t.COLUMN_COMMENT from information_schema.`COLUMNS` t where table_name = ?";
-//		System.out.println(sql);
+		// System.out.println(sql);
 		try
 		{
 			ps = conn.prepareStatement(sql);

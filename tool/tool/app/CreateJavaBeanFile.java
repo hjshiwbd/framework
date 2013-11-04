@@ -27,35 +27,11 @@ public class CreateJavaBeanFile
 
 	public static void main(String[] args)
 	{
-		// 数据库表名
-		String tableName = "p_areainfo";
-		// 文件名
-		String beanFileName = "AreainfoBean";
-
-		// 生成javabean.java
-		// String beanFileFolder =
-		// "F:/svn/iispace/iiSpaceTeam/iiSpace0.1_code/framework/src/framework/base/bean";//
-		// 创建目录
-		// String packageName = "framework.base.bean"; // 创建文件包名
-		String beanFileFolder = "F:/!job/svn/files/iispace/iiSpaceTeam/iiSpace0.1_code/主项目/iispace/src/com/iispace/web/portal/bean";// 创建目录
-		String packageName = "com.iispace.web.portal.bean"; // 创建文件包名
-		CreateJavaBeanFile creator = new CreateJavaBeanFile(tableName,
-				beanFileName, packageName, beanFileFolder);
-		creator.createBeanFile(true);
-
-		System.out.println();
-		System.out.println("------------------");
-		System.out.println();
-
-		// 生成mybatis-mapper.xml
-		String xmlFileFolder = "F:/!job/svn/files/iispace/iiSpaceTeam/iiSpace0.1_code/主项目/iispace/src/com/iispace/web/portal/config/mybatis";// 创建目录
-		MybatisSqlGenerator generator = new MybatisSqlGenerator(tableName,
-				beanFileName, xmlFileFolder);
-		generator.createMapperFile(true);
+		
 	}
 
 	public CreateJavaBeanFile(String tableName, String beanFileName,
-			String packageName, String folderPath)
+	        String packageName, String folderPath)
 	{
 		this.beanFileName = beanFileName;
 		this.packageName = packageName;
@@ -63,7 +39,8 @@ public class CreateJavaBeanFile
 
 		// 先查表,获得字段名,和每个字段的类型,注释
 		getConn();
-		colList = DBUtils.getMysqlColList(conn, tableName);
+		// colList = DBUtils.getMysqlColList(conn, tableName);
+		colList = DBUtils.getOracleColList(conn, tableName);
 	}
 
 	/**
@@ -78,11 +55,11 @@ public class CreateJavaBeanFile
 		// 用于输出的文本
 		StringBuffer out = new StringBuffer("package ");
 		out.append(packageName).append(";\r\n\r\n")
-				.append("import framework.base.bean.BaseBean;")
-				.append("\r\n\r\n");
+		        .append("import framework.base.bean.BaseBean;")
+		        .append("\r\n\r\n");
 		// 类名
 		out.append("public class " + beanFileName + " extends BaseBean")
-				.append(" {\r\n");
+		        .append(" {\r\n");
 
 		// 属性名输出文本
 		StringBuffer fieldOut = new StringBuffer();
@@ -148,7 +125,8 @@ public class CreateJavaBeanFile
 		// String username = "ssc2";
 		// String password = "ssc2";
 		// conn = ConnUtils.getOracleConn(ip, port, sid, username, password);
-		conn = ConnUtils.getConn1();
+		// conn = ConnUtils.getConn1();
+		conn = ConnUtils.getSSCPMConn();
 
 	}
 }

@@ -23,10 +23,10 @@ import framework.base.mapper.BaseMapper;
  * 
  */
 public class BaseDAOSupportImpl extends SqlSessionDaoSupport implements
-		IBaseDAOSupport
+        IBaseDAOSupport
 {
 	private Logger logger = LoggerFactory.getLogger(getClass());
-	
+
 	private JdbcTemplate jdbcTemplate;
 
 	public void setJdbcTemplate(JdbcTemplate jdbcTemplate)
@@ -156,25 +156,39 @@ public class BaseDAOSupportImpl extends SqlSessionDaoSupport implements
 	 * 
 	 */
 	public <E> Pager<E> selectPage(String mybatisId, Object param,
-			Pager<E> pager)
+	        Pager<E> pager)
 	{
-		// 构建PageBounds查询对象
-		PageBounds pageBounds = new PageBounds(pager.getCurtPage(),
-				pager.getCountPerPage(), Order.formString(pager.getOrderby()),
-				pager.isContainsTotalCount());
-
-		// 查列表
-		List<E> list = getSqlSession().selectList(mybatisId, param, pageBounds);
-		pager.setPageList(list);
-
-		// 查总行数
-		if (pager.isContainsTotalCount())
+		if (pager == null)
 		{
-			// 允许查询总行数
-			PageList<E> l = (PageList<E>) list;
-			pager.setTotal(l.getPaginator().getTotalCount());
-		}
+			// pager为空,表示查全表
+			List<E> list = getSqlSession().selectList(mybatisId, param);
 
-		return pager;
+			// pageList中包含查询结果
+			pager = new Pager<E>();
+			pager.setPageList(list);
+			return pager;
+		}
+		else
+		{
+			// 构建PageBounds查询对象
+			PageBounds pageBounds = new PageBounds(pager.getCurtPage(),
+			        pager.getCountPerPage(), Order.formString(pager
+			                .getOrderby()), pager.isContainsTotalCount());
+
+			// 查列表
+			List<E> list = getSqlSession().selectList(mybatisId, param,
+			        pageBounds);
+			pager.setPageList(list);
+
+			// 查总行数
+			if (pager.isContainsTotalCount())
+			{
+				// 允许查询总行数
+				PageList<E> l = (PageList<E>) list;
+				pager.setTotal(l.getPaginator().getTotalCount());
+			}
+
+			return pager;
+		}
 	}
 }

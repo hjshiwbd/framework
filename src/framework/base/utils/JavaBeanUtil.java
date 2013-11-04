@@ -10,13 +10,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
+
 import framework.base.annotation.Print;
 
 /**
  * javabean基础类
  * 
  * @author hjin
- * 
  */
 @SuppressWarnings("all")
 public class JavaBeanUtil
@@ -30,11 +32,10 @@ public class JavaBeanUtil
 	/**
 	 * 打印所有属性,不显示annotation,打印null,使用IsPrint注解
 	 * 
-	 * @author hjin
-	 * @cratedate 2012-12-17 下午3:23:16
 	 * @param obj
 	 * @return
-	 * 
+	 * @author hjin
+	 * @cratedate 2012-12-17 下午3:23:16
 	 */
 	public static String toString(Object obj)
 	{
@@ -44,11 +45,10 @@ public class JavaBeanUtil
 	/**
 	 * 生成日志所需的属性(有注解,不为null)
 	 * 
-	 * @author hjin
-	 * @cratedate 2012-12-26 下午3:24:26
 	 * @param obj
 	 * @return
-	 * 
+	 * @author hjin
+	 * @cratedate 2012-12-26 下午3:24:26
 	 */
 	public static String writelog(Object obj)
 	{
@@ -68,7 +68,7 @@ public class JavaBeanUtil
 	 * @return
 	 */
 	public static String toString(Object obj, boolean isAnnotation,
-			boolean isShowNull, boolean isPrint)
+	        boolean isShowNull, boolean isPrint)
 	{
 		if (obj == null)
 		{
@@ -80,7 +80,7 @@ public class JavaBeanUtil
 		if (obj instanceof List)
 		{
 			StringBuffer buffer = new StringBuffer(obj.getClass()
-					.getSimpleName());
+			        .getSimpleName());
 			List objList = (List) obj;
 			for (int j = 0; j < objList.size(); j++)
 			{
@@ -88,17 +88,17 @@ public class JavaBeanUtil
 				if (j == 0)
 				{
 					buffer.append("<" + o.getClass().getSimpleName() + ">("
-							+ objList.size() + "):");
+					        + objList.size() + "):");
 				}
 				String propertyOut = "【"
-						+ toString(o, isAnnotation, isShowNull, isPrint) + "】";
+				        + toString(o, isAnnotation, isShowNull, isPrint) + "】";
 				buffer.append(propertyOut);
 			}
 			output = buffer.toString();
 		} else if (obj instanceof Map)
 		{
 			StringBuffer buffer = new StringBuffer(obj.getClass()
-					.getSimpleName());
+			        .getSimpleName());
 			buffer.append(":");
 			Map map = (Map) obj;
 			Iterator it = map.entrySet().iterator();
@@ -108,13 +108,13 @@ public class JavaBeanUtil
 				String key = (String) entry.getKey();
 				Object value = entry.getValue();
 				String s = key + "="
-						+ toString(value, isAnnotation, isShowNull, isPrint)
-						+ ",";
+				        + toString(value, isAnnotation, isShowNull, isPrint)
+				        + ",";
 				buffer.append(s);
 			}
 			output = buffer.toString().substring(0, buffer.length() - 1);
 		} else if (obj instanceof String || obj instanceof Number
-				|| obj instanceof Boolean)
+		        || obj instanceof Boolean)
 		{
 			output = obj.toString();
 		} else if (obj instanceof Date)
@@ -126,8 +126,8 @@ public class JavaBeanUtil
 			for (int i = 0; i < os.length; i++)
 			{
 				String s = "{"
-						+ toString(os[i], isAnnotation, isShowNull, isPrint)
-						+ "}";
+				        + toString(os[i], isAnnotation, isShowNull, isPrint)
+				        + "}";
 				output += s;
 			}
 			// output = Arrays.deepToString((Object[]) obj);
@@ -135,36 +135,60 @@ public class JavaBeanUtil
 		{
 			// 当obj为JavaBean类型
 			Class cls = obj.getClass();
+
 			StringBuffer buffer = new StringBuffer(obj.getClass()
-					.getSimpleName());
+			        .getSimpleName());
 			buffer.append(":");
-			Field[] fields = cls.getDeclaredFields();
-			for (int i = 0; i < fields.length; i++)
+
+			// 获取obj所有父类的所有方法
+			Method[] allMethods = cls.getDeclaredMethods();
+			// 当前类的父类
+			Class<?> superCls = cls.getSuperclass();
+			while (!superCls.getName().equals(Object.class.getName()))
 			{
-				if (fields[i].getName().equals("serialVersionUID"))
+				// 递归,找到所有父类的方法
+				// 当父类不是Object
+				// 获取父类方法
+				Method[] methodsSuper = superCls.getDeclaredMethods();
+				// 合并所有方法
+				allMethods = ArrayUtils.addAll(allMethods, methodsSuper);
+
+				superCls = superCls.getSuperclass();
+			}
+
+			// 非null的属性的出现次数
+			int notNullProp = 0;
+			// 执行所有get方法
+			for (int i = 0; i < allMethods.length; i++)
+			{
+				Method method = allMethods[i];
+
+				// 只处理get方法
+				if (!method.getName().startsWith("get"))
 				{
 					continue;
 				}
 
-				// 如果Print的注解值为false,则跳过
-				if (isPrint && !isPrint(fields[i]))
+				if (method.getName().equals("getSerialVersionUID"))
 				{
 					continue;
 				}
 
-				// 对象的属性
-				String fieldName = fields[i].getName();
-				if (fieldName == null)
+				// 如果不要求打印或者Print的注解值为false,则跳过
+				if (!isPrint || !isPrint(method))
 				{
 					continue;
 				}
-				// 属性的get方法
-				String getMethod = generateGet(fields[i].getName());
-				// 执行get方法
-				Object methodResult = invokeMethodNoParam(cls, getMethod, obj);
+
+				// 方法对应的属性名
+				String fieldName = StringUtils.uncapitalize(method.getName()
+				        .substring(3));
+
+				Object methodResult = invokeMethodNoParam(cls,
+				        method.getName(), obj);
 				if (methodResult instanceof List)
 				{
-					if (i == 0)
+					if (notNullProp == 0)
 					{
 						buffer.append(fieldName + "={");
 					} else
@@ -176,21 +200,23 @@ public class JavaBeanUtil
 					{
 						Object o = list.get(j);
 						String propertyOut = "【["
-								+ JavaBeanUtil.toString(o, isAnnotation,
-										isShowNull, isPrint) + "]】";
+						        + JavaBeanUtil.toString(o, isAnnotation,
+						                isShowNull, isPrint) + "]】";
 						buffer.append(propertyOut);
 					}
 					buffer.append("}");
+					notNullProp++;
 				} else if (methodResult instanceof Object[])
 				{
 					String result = Arrays.toString((Object[]) methodResult);
-					if (i == 0)
+					if (notNullProp == 0)
 					{
 						buffer.append(fieldName + "=" + result);
 					} else
 					{
 						buffer.append("," + fieldName + "=" + result);
 					}
+					notNullProp++;
 				} else
 				{
 					if (methodResult == null)
@@ -198,7 +224,7 @@ public class JavaBeanUtil
 						if (isShowNull)
 						{
 							String result = "null";
-							if (i == 0)
+							if (notNullProp == 0)
 							{
 								buffer.append(fieldName + "=" + result);
 							} else
@@ -209,16 +235,18 @@ public class JavaBeanUtil
 					} else
 					{
 						String result = methodResult.toString();
-						if (i == 0)
+						if (notNullProp == 0)
 						{
 							buffer.append(fieldName + "=" + result);
 						} else
 						{
 							buffer.append("," + fieldName + "=" + result);
 						}
+						notNullProp++;
 					}
 				}
 			}
+
 			output = buffer.toString();
 		}
 
@@ -234,7 +262,7 @@ public class JavaBeanUtil
 	private static String generateGet(String fieldName)
 	{
 		return "get" + fieldName.substring(0, 1).toUpperCase()
-				+ fieldName.substring(1);
+		        + fieldName.substring(1);
 	}
 
 	/**
@@ -246,7 +274,7 @@ public class JavaBeanUtil
 	 * @return
 	 */
 	private static Object invokeMethodNoParam(Class cls, String methodName,
-			Object obj)
+	        Object obj)
 	{
 		Object retObj = null;
 		try
@@ -287,10 +315,10 @@ public class JavaBeanUtil
 	 * @return
 	 * 
 	 */
-	public static boolean isPrint(Field field)
+	public static boolean isPrint(Method method)
 	{
 		boolean flag = true;
-		Print define = field.getAnnotation(Print.class);
+		Print define = method.getAnnotation(Print.class);
 		if (define != null && !define.isPrint())
 		{
 			flag = false;

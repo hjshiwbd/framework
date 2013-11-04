@@ -1,0 +1,47 @@
+<project name="ca" default="dist" basedir=".">
+
+    <property name="src" value="src/framework"/>
+
+    <property name="webapp" value="WebRoot"/>
+
+    <property name="lib" value="${webapp}/WEB-INF/lib"/>
+    <property name="other-lib" value="${webapp}/WEB-INF/other-lib"/>
+
+    <property name="dist" value="${webapp}/WEB-INF/classes/framwork"/>
+
+    <property name="jarfile" value="framework.jar"/>
+    
+    <target name="init">
+        <tstamp>
+			<format property="build.time" pattern="yyyy-MM-dd HH:mm:ss aa" />
+		</tstamp>
+		<echo message="build time : ${build.time}"/>
+    </target>
+    
+    <target name="clean" depends="init">
+        <delete dir="${dist}"/>
+    </target>
+    
+    <target name="prepare" depends="clean">
+        <mkdir dir="${dist}"/>
+    </target>
+    
+    <target name="compile" depends="prepare">       
+        <javac srcdir="${src}" destdir="${dist}" debug="true" debuglevel="lines,vars,source" encoding="utf-8"> 
+            <classpath>
+                <fileset dir="${lib}">
+                    <include name="**/*.jar"/>
+                </fileset>
+            	<fileset dir="${other-lib}">
+            		<include name="**/*.jar"/>
+            	</fileset>
+            </classpath>
+        	<compilerarg value="-Xlint:unchecked"/>
+        </javac>
+    </target>
+
+    <target name="dist" depends="compile">
+        <jar jarfile="${jarfile}" basedir="${dist}" />
+    </target>
+
+</project>

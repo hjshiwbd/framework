@@ -12,7 +12,6 @@ import framework.base.annotation.Print;
  * 
  * @author hjin
  * @cratedate 2013-8-7 上午9:23:13
- * 
  */
 public class Pager<T> extends PageBounds implements Serializable
 {
@@ -90,12 +89,20 @@ public class Pager<T> extends PageBounds implements Serializable
 	/**
 	 * 分页样式
 	 */
-	private String style;
+	private String style = "pagination";
+	/**
+	 * 翻页请求的url
+	 */
+	private String url = "#";
 	/**
 	 * 生成html串
 	 */
+	@Print(isPrint = false)
 	private String htmlOutput;
 
+	/**
+	 * mysql分页参数
+	 */
 	private int offset;
 	private int limit;
 
@@ -138,6 +145,32 @@ public class Pager<T> extends PageBounds implements Serializable
 		this.beanName = beanName;
 	}
 
+	/**
+	 * 构建翻页的页面代码
+	 * 
+	 * @return
+	 */
+	public String createHtml()
+	{
+		String template1 = "<div class=" + style + ">{span}</div>";
+		String template2 = "<span><a href={url}>{i}</a></span>";
+
+		url = url == null ? "#" : url;
+
+		String span = "";
+		for (int i = 1; i <= getTotalPage(); i++)
+		{
+			span += template2.replace("{i}", i + "").replace("{url}", url);
+		}
+		String result = template1.replace("{span}", span);
+		return result;
+	}
+
+	/**
+	 * 计算当前页
+	 * 
+	 * @return
+	 */
 	public int getCurtPage()
 	{
 		if (getTotalPage() > 0 && curtPage > getTotalPage())
@@ -240,6 +273,7 @@ public class Pager<T> extends PageBounds implements Serializable
 
 	public String getHtmlOutput()
 	{
+		htmlOutput = createHtml();
 		return htmlOutput;
 	}
 
@@ -324,15 +358,21 @@ public class Pager<T> extends PageBounds implements Serializable
 	public int getOffset()
 	{
 		offset = (curtPage - 1) * countPerPage;
-		if (offset == 0)
-		{
-			offset = 1;
-		}
 		return offset;
 	}
 
 	public void setOffset(int offset)
 	{
 		this.offset = offset;
+	}
+
+	public String getUrl()
+	{
+		return url;
+	}
+
+	public void setUrl(String url)
+	{
+		this.url = url;
 	}
 }

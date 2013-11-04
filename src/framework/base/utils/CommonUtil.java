@@ -246,7 +246,7 @@ public class CommonUtil
 		{
 			return false;
 		}
-		String reg = "^1[3|4|5|8][\\d]{9}";
+		String reg = "^1[3|4|5|8][\\d]{9}$";
 		return mobile.matches(reg);
 	}
 	
@@ -278,6 +278,5 @@ public class CommonUtil
 	public static void main(String[] args)
 	{
 		System.out.println(mobileFormatCheck("13987654321"));
-		System.out.println(CryptogramUtil.encryptHexStr("123"));
 	}
 }

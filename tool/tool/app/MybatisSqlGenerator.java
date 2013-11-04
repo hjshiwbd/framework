@@ -1,25 +1,24 @@
 package tool.app;
 
-import java.sql.Connection;
-import java.util.List;
-import java.util.Map;
-
+import org.apache.commons.lang3.StringUtils;
 import tool.utils.ConnUtils;
 import tool.utils.DBUtils;
 import tool.utils.IOUtils;
 
+import java.sql.Connection;
+import java.util.List;
+import java.util.Map;
+
 /**
- * 
  * @author hjin
  * @cratedate 2013-8-6 上午9:56:15
- * 
  */
 public class MybatisSqlGenerator
 {
 	private final String VARCHAR = "VARCHAR";
 	String newline = "\r\n";
 
-	private final String pkg = "com.iispace.web.portal.mapper.";
+	private String pkg;
 	private String comment = "<!-- %s -->" + newline;
 
 	private String tableName = "";
@@ -28,34 +27,12 @@ public class MybatisSqlGenerator
 
 	public static void main(String[] args)
 	{
-		// 初始化参数
-		String tableName = "p_logdefine";
-		String beanName = "LogDefineBean";
-		String folder = "F:/svn/iispace/iiSpaceTeam/iiSpace0.1_code/主项目/iispace/src/com/iispace/web/portal/config/mybatis";
-
-		// 可以单独生成sql,也可以完整生成xml文件
-		MybatisSqlGenerator templete = new MybatisSqlGenerator(tableName,
-		        beanName, folder);
-		// 生成select语句
-		// String sql1 = templete.getMybatisSelect();
-		// System.out.println(sql1);
-		//
-		// 生成insert语句
-		// String sql2 = templete.getInsert("#");
-		// System.out.println(sql2);
-		//
-		// 生成update语句
-		// String sql3 = templete.getUpdate("");
-		// System.out.println(sql3);
-		//
-		// 生成delete语句
-		// String sql4 = templete.getDelete();
-		// System.out.println(sql4);
-
-		// 生成文件
-		templete.createMapperFile(true);
+		
 	}
 
+	/**
+	 * List[Map[name,type,comment]]
+	 */
 	private List<Map<String, String>> colList;
 
 	/**
@@ -68,23 +45,24 @@ public class MybatisSqlGenerator
 	 * @param fileFolder
 	 *            xml生成物理地址
 	 */
-	public MybatisSqlGenerator(String tableName, String beanName,
+	public MybatisSqlGenerator(String pkg, String tableName, String beanName,
 	        String fileFolder)
 	{
+		this.pkg = pkg;
 		this.tableName = tableName;
 		this.beanName = "\"" + beanName + "\"";
 		this.fileFolder = fileFolder;
-		Connection conn = ConnUtils.getConn1();
-		this.colList = DBUtils.getMysqlColList(conn, tableName);
+		Connection conn = ConnUtils.getSSCPMConn();
+		// this.colList = DBUtils.getMysqlColList(conn, tableName);
+		this.colList = DBUtils.getOracleColList(conn, tableName);
 	}
 
 	/**
 	 * 生成resultmap映射
 	 * 
+	 * @return
 	 * @author hjin
 	 * @cratedate 2013-9-9 下午1:36:45
-	 * @return
-	 * 
 	 */
 	public String getResultMap()
 	{
@@ -109,7 +87,6 @@ public class MybatisSqlGenerator
 	/**
 	 * ibatis select
 	 * 
-	 * @param tableName
 	 * @return
 	 */
 	public String getMybatisSelect()
@@ -131,8 +108,7 @@ public class MybatisSqlGenerator
 			if (i == 0)
 			{
 				sql += name;
-			}
-			else
+			} else
 			{
 				sql += ", " + name;
 			}
@@ -145,8 +121,7 @@ public class MybatisSqlGenerator
 				        + " != ''\">" + newline + "and " + name + " = #{"
 				        + name + ",jdbcType=" + type + "}" + newline + "</if>"
 				        + newline;
-			}
-			else
+			} else
 			{
 				// <if test="id!=null"> and id = #{id} </if>
 				whereAppend += "<if test=\"" + name + "!=null\">" + newline
@@ -161,9 +136,7 @@ public class MybatisSqlGenerator
 	}
 
 	/**
-	 * 
-	 * @param table
-	 * @param valuetype
+	 * @param valuePlaceholder
 	 *            占位符
 	 * @return
 	 */
@@ -189,16 +162,14 @@ public class MybatisSqlGenerator
 					colStr += name;
 					valStr += valuePlaceholder + "{" + name + ",jdbcType="
 					        + type + "}";
-				}
-				else
+				} else
 				{
 					colStr += ", " + name;
 					valStr += ", " + valuePlaceholder + "{" + name
 					        + ",jdbcType=" + type + "}";
 				}
 			}
-		}
-		else
+		} else
 		{
 			//
 			for (int i = 0; i < colList.size(); i++)
@@ -209,8 +180,7 @@ public class MybatisSqlGenerator
 				{
 					colStr += name;
 					valStr += valuePlaceholder;
-				}
-				else
+				} else
 				{
 					colStr += ", " + name;
 					valStr += ", " + valuePlaceholder;
@@ -231,7 +201,6 @@ public class MybatisSqlGenerator
 	/**
 	 * mybatis update
 	 * 
-	 * @param tableName
 	 * @param valuePlaceholder
 	 * @return
 	 */
@@ -254,8 +223,7 @@ public class MybatisSqlGenerator
 			if (i == 0)
 			{
 				where = " where " + name + " = #{" + name + "}";
-			}
-			else
+			} else
 			{
 				String s = "<if test=\"" + name + "!=null\">" + newline + ""
 				        + name + " = #{" + name + ",jdbcType=" + type + "},"
@@ -273,7 +241,6 @@ public class MybatisSqlGenerator
 	/**
 	 * ibatis delete
 	 * 
-	 * @param tableName
 	 * @return
 	 */
 	public String getDelete()
@@ -290,12 +257,41 @@ public class MybatisSqlGenerator
 	}
 
 	/**
+	 * 格式化列名,加入前缀
+	 * 
+	 * @param prefix
+	 * @param suffix
+	 * @return
+	 */
+	public String formatColumn(String prefix, String suffix)
+	{
+		String result = ",";
+		for (Map<String, String> map : colList)
+		{
+			String name = map.get("name").toLowerCase();
+
+			String _suffix;
+			if (!StringUtils.isBlank(suffix))
+			{
+				_suffix = " " + suffix + name;
+			} else
+			{
+				_suffix = "";
+			}
+
+			result += prefix + name + _suffix + ", ";
+		}
+		result = result.substring(1);
+		System.out.println(result);
+		return result;
+	}
+
+	/**
 	 * create mybatis mapper file
 	 * 
+	 * @return
 	 * @author hjin
 	 * @cratedate 2013-9-5 上午9:42:42
-	 * @return
-	 * 
 	 */
 	public void createMapperFile(boolean isCreateFile)
 	{
@@ -328,23 +324,23 @@ public class MybatisSqlGenerator
 
 		System.out.println(all);
 
-		if (isCreateFile) {
+		if (isCreateFile)
+		{
 			// 写文件
 			String fileName = "mapper-"
-			        + beanName.replace("\"", "").toLowerCase().replace("bean", "")
-			        + ".xml";
-			IOUtils.createFile(fileFolder, fileName, all.toString());	
+			        + beanName.replace("\"", "").toLowerCase()
+			                .replace("bean", "") + ".xml";
+			IOUtils.createFile(fileFolder, fileName, all.toString());
 		}
 	}
 
 	/**
 	 * oracle数据库类型名称到java类型名称的转换
 	 * 
-	 * @author hjin
-	 * @cratedate 2013-8-6 上午10:15:14
 	 * @param type
 	 * @return
-	 * 
+	 * @author hjin
+	 * @cratedate 2013-8-6 上午10:15:14
 	 */
 	public String convertOracleType(String type)
 	{
@@ -362,5 +358,10 @@ public class MybatisSqlGenerator
 			type = "NUMERIC";// org.apache.ibatis.type.JdbcType.NUMERIC
 		}
 		return type;
+	}
+
+	public void setTableName(String tableName)
+	{
+		this.tableName = tableName;
 	}
 }
