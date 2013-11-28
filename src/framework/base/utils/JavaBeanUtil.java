@@ -1,6 +1,5 @@
 package framework.base.utils;
 
-import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
@@ -76,9 +75,9 @@ public class JavaBeanUtil
 		}
 		// 输出字符串
 		String output = "";
-		// 当obj为List类型
 		if (obj instanceof List)
 		{
+			// 当obj为List类型
 			StringBuffer buffer = new StringBuffer(obj.getClass()
 			        .getSimpleName());
 			List objList = (List) obj;
@@ -95,8 +94,10 @@ public class JavaBeanUtil
 				buffer.append(propertyOut);
 			}
 			output = buffer.toString();
-		} else if (obj instanceof Map)
+		}
+		else if (obj instanceof Map)
 		{
+			// 当obj为Map类型
 			StringBuffer buffer = new StringBuffer(obj.getClass()
 			        .getSimpleName());
 			buffer.append(":");
@@ -113,15 +114,21 @@ public class JavaBeanUtil
 				buffer.append(s);
 			}
 			output = buffer.toString().substring(0, buffer.length() - 1);
-		} else if (obj instanceof String || obj instanceof Number
+		}
+		else if (obj instanceof String || obj instanceof Number
 		        || obj instanceof Boolean)
 		{
+			// 当obj为常见类型类型
 			output = obj.toString();
-		} else if (obj instanceof Date)
+		}
+		else if (obj instanceof Date)
 		{
+			// 当obj为Date类型
 			output = DateUtil.formatDate((Date) obj);
-		} else if (obj instanceof Object[])
+		}
+		else if (obj instanceof Object[])
 		{
+			// 当obj为数组对象
 			Object[] os = (Object[]) obj;
 			for (int i = 0; i < os.length; i++)
 			{
@@ -131,9 +138,10 @@ public class JavaBeanUtil
 				output += s;
 			}
 			// output = Arrays.deepToString((Object[]) obj);
-		} else
+		}
+		else
 		{
-			// 当obj为JavaBean类型
+			// 当obj为自定义类型
 			Class cls = obj.getClass();
 
 			StringBuffer buffer = new StringBuffer(obj.getClass()
@@ -184,14 +192,19 @@ public class JavaBeanUtil
 				String fieldName = StringUtils.uncapitalize(method.getName()
 				        .substring(3));
 
+				// 反射得到get方法的执行结果
 				Object methodResult = invokeMethodNoParam(cls,
 				        method.getName(), obj);
+
+				// 转换执行结果->string,用于打印输出
 				if (methodResult instanceof List)
 				{
+					// 结果值类型=list
 					if (notNullProp == 0)
 					{
 						buffer.append(fieldName + "={");
-					} else
+					}
+					else
 					{
 						buffer.append("," + fieldName + "={");
 					}
@@ -206,39 +219,49 @@ public class JavaBeanUtil
 					}
 					buffer.append("}");
 					notNullProp++;
-				} else if (methodResult instanceof Object[])
+				}
+				else if (methodResult instanceof Object[])
 				{
+					// 结果值类型=数组
 					String result = Arrays.toString((Object[]) methodResult);
 					if (notNullProp == 0)
 					{
 						buffer.append(fieldName + "=" + result);
-					} else
+					}
+					else
 					{
 						buffer.append("," + fieldName + "=" + result);
 					}
 					notNullProp++;
-				} else
+				}
+				else
 				{
+
 					if (methodResult == null)
 					{
+						// 结果值=null
 						if (isShowNull)
 						{
+							// 入参要求显示null值
 							String result = "null";
 							if (notNullProp == 0)
 							{
 								buffer.append(fieldName + "=" + result);
-							} else
+							}
+							else
 							{
 								buffer.append("," + fieldName + "=" + result);
 							}
 						}
-					} else
+					}
+					else
 					{
 						String result = methodResult.toString();
 						if (notNullProp == 0)
 						{
 							buffer.append(fieldName + "=" + result);
-						} else
+						}
+						else
 						{
 							buffer.append("," + fieldName + "=" + result);
 						}
@@ -281,19 +304,24 @@ public class JavaBeanUtil
 		{
 			Method method = cls.getMethod(methodName);
 			retObj = method.invoke(obj);
-		} catch (SecurityException e)
+		}
+		catch (SecurityException e)
 		{
 			e.printStackTrace();
-		} catch (IllegalArgumentException e)
+		}
+		catch (IllegalArgumentException e)
 		{
 			e.printStackTrace();
-		} catch (NoSuchMethodException e)
+		}
+		catch (NoSuchMethodException e)
 		{
 			e.printStackTrace();
-		} catch (IllegalAccessException e)
+		}
+		catch (IllegalAccessException e)
 		{
 			e.printStackTrace();
-		} catch (InvocationTargetException e)
+		}
+		catch (InvocationTargetException e)
 		{
 			e.printStackTrace();
 		}

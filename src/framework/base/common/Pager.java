@@ -3,6 +3,9 @@ package framework.base.common;
 import java.io.Serializable;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.github.miemiedev.mybatis.paginator.domain.PageBounds;
 
 import framework.base.annotation.Print;
@@ -15,6 +18,8 @@ import framework.base.annotation.Print;
  */
 public class Pager<T> extends PageBounds implements Serializable
 {
+	private Logger logger = LoggerFactory.getLogger(getClass());
+
 	/**
 	 * @description
 	 */
@@ -152,17 +157,78 @@ public class Pager<T> extends PageBounds implements Serializable
 	 */
 	public String createHtml()
 	{
+		// 三个模版
 		String template1 = "<div class=" + style + ">{span}</div>";
-		String template2 = "<span><a href={url}>{i}</a></span>";
+		String template2 = "<span><a href={url}?curtPage={index}>{text}</a></span>";
+		String template3 = "<span>{text}</span>";
 
+		// 翻页链接
 		url = url == null ? "#" : url;
 
 		String span = "";
-		for (int i = 1; i <= getTotalPage(); i++)
+		// 翻页栏开始页
+		startPage = getStartPage();
+		// 翻页栏结束页
+		endPage = getEndPage();
+		// 翻页栏内个数少于预期时,补齐
+		if ((endPage - startPage) < (indexLength - 1) && endPage > 1)
 		{
-			span += template2.replace("{i}", i + "").replace("{url}", url);
+			startPage = endPage - indexLength + 1;
 		}
-		String result = template1.replace("{span}", span);
+		startPage = startPage < 1 ? 1 : startPage;
+
+		// 循环,构成html
+		for (int i = startPage; i <= endPage; i++)
+		{
+			if (i != curtPage)
+			{
+				span += template2.replace("{index}", i + "")
+				        .replace("{text}", i + "").replace("{url}", url);
+			}
+			else
+			{
+				// 当前显示页,无link
+				span += template3.replace("{text}", i + "");
+			}
+		}
+
+		// 首页
+		String first = template2.replace("{index}", 1 + "")
+		        .replace("{text}", "首页").replace("{url}", url);
+		// 末页
+		String last = template2.replace("{index}", totalPage + "")
+		        .replace("{text}", "末页").replace("{url}", url);
+
+		// 拼接
+		String allHtml = "";
+		// System.out.println(curtPage + "," + totalPage + "," + startPage + ","
+		// + endPage);
+		if (curtPage == 1 && curtPage != totalPage)
+		{
+			// 是否首页
+			allHtml = span + last;
+		}
+		else if (curtPage != 1 && curtPage == totalPage)
+		{
+			// 是否末页
+			allHtml = first + span;
+		}
+		else if (curtPage == totalPage && curtPage == 1)
+		{
+			// 既是首页也是末页,总页数=1
+			allHtml = span;
+		}
+		else
+		{
+			// 其他
+			allHtml = first + span + last;
+		}
+
+		String result = template1.replace("{span}", allHtml);
+		if (logger.isDebugEnabled())
+		{
+			logger.debug(result);
+		}
 		return result;
 	}
 
@@ -223,6 +289,8 @@ public class Pager<T> extends PageBounds implements Serializable
 
 	public int getIndexLength()
 	{
+		indexLength = indexLength > getTotalPage() ? getTotalPage()
+		        : getIndexLength();
 		return indexLength;
 	}
 
@@ -233,6 +301,11 @@ public class Pager<T> extends PageBounds implements Serializable
 
 	public int getStartPage()
 	{
+		startPage = curtPage - (indexLength / 2);
+		if (startPage < 1)
+		{
+			startPage = 1;
+		}
 		return startPage;
 	}
 
@@ -243,6 +316,11 @@ public class Pager<T> extends PageBounds implements Serializable
 
 	public int getEndPage()
 	{
+		endPage = getStartPage() + indexLength - 1;
+		if (endPage > getTotalPage())
+		{
+			endPage = getTotalPage();
+		}
 		return endPage;
 	}
 
