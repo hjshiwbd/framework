@@ -27,7 +27,7 @@ public class BaseConstants
 	public static class CommonPageParam
 	{
 		/**
-		 * 通用结果页面.在project.properties中配置
+		 * 通用结果页面地址.在project.properties中配置
 		 */
 		public static final String GLOBAL_PAGE_RESULT = "global.page.result";
 		/**
