@@ -1,5 +1,7 @@
 package framework.base.utils;
 
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
@@ -8,11 +10,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-
-import org.apache.commons.lang3.ArrayUtils;
-import org.apache.commons.lang3.StringUtils;
-
-import framework.base.annotation.Print;
 
 /**
  * javabean基础类
@@ -38,20 +35,7 @@ public class JavaBeanUtil
 	 */
 	public static String toString(Object obj)
 	{
-		return toString(obj, false, false, true);
-	}
-
-	/**
-	 * 生成日志所需的属性(有注解,不为null)
-	 * 
-	 * @param obj
-	 * @return
-	 * @author hjin
-	 * @cratedate 2012-12-26 下午3:24:26
-	 */
-	public static String writelog(Object obj)
-	{
-		return toString(obj, true, false, true);
+		return toString(obj, false, true);
 	}
 
 	/**
@@ -66,8 +50,8 @@ public class JavaBeanUtil
 	 *            是否读取并使用Print注解的值
 	 * @return
 	 */
-	public static String toString(Object obj, boolean isAnnotation,
-	        boolean isShowNull, boolean isPrint)
+	public static String toString(Object obj, boolean isShowNull,
+	        boolean isPrint)
 	{
 		if (obj == null)
 		{
@@ -89,8 +73,8 @@ public class JavaBeanUtil
 					buffer.append("<" + o.getClass().getSimpleName() + ">("
 					        + objList.size() + "):");
 				}
-				String propertyOut = "【"
-				        + toString(o, isAnnotation, isShowNull, isPrint) + "】";
+				String propertyOut = "【" + toString(o, isShowNull, isPrint)
+				        + "】";
 				buffer.append(propertyOut);
 			}
 			output = buffer.toString();
@@ -108,8 +92,7 @@ public class JavaBeanUtil
 				Entry entry = (Entry) it.next();
 				String key = (String) entry.getKey();
 				Object value = entry.getValue();
-				String s = key + "="
-				        + toString(value, isAnnotation, isShowNull, isPrint)
+				String s = key + "=" + toString(value, isShowNull, isPrint)
 				        + ",";
 				buffer.append(s);
 			}
@@ -132,9 +115,7 @@ public class JavaBeanUtil
 			Object[] os = (Object[]) obj;
 			for (int i = 0; i < os.length; i++)
 			{
-				String s = "{"
-				        + toString(os[i], isAnnotation, isShowNull, isPrint)
-				        + "}";
+				String s = "{" + toString(os[i], isShowNull, isPrint) + "}";
 				output += s;
 			}
 			// output = Arrays.deepToString((Object[]) obj);
@@ -159,7 +140,7 @@ public class JavaBeanUtil
 				// 获取父类方法
 				Method[] methodsSuper = superCls.getDeclaredMethods();
 				// 合并所有方法
-				allMethods = ArrayUtils.addAll(allMethods, methodsSuper);
+				allMethods = addAllArrays(allMethods, methodsSuper);
 
 				superCls = superCls.getSuperclass();
 			}
@@ -170,14 +151,15 @@ public class JavaBeanUtil
 			for (int i = 0; i < allMethods.length; i++)
 			{
 				Method method = allMethods[i];
+				String methodName = method.getName();
 
 				// 只处理get方法
-				if (!method.getName().startsWith("get"))
+				if (!methodName.startsWith("get"))
 				{
 					continue;
 				}
 
-				if (method.getName().equals("getSerialVersionUID"))
+				if (methodName.equalsIgnoreCase("getSerialVersionUID"))
 				{
 					continue;
 				}
@@ -188,13 +170,12 @@ public class JavaBeanUtil
 					continue;
 				}
 
-				// 方法对应的属性名
-				String fieldName = StringUtils.uncapitalize(method.getName()
-				        .substring(3));
+				// 方法对应的属性名,去掉get后首字母大写
+				String fieldName = uncapitalize(methodName.substring(3));
 
 				// 反射得到get方法的执行结果
 				Object methodResult = invokeMethodNoParam(cls,
-				        method.getName(), obj);
+				        methodName, obj);
 
 				// 转换执行结果->string,用于打印输出
 				if (methodResult instanceof List)
@@ -213,8 +194,8 @@ public class JavaBeanUtil
 					{
 						Object o = list.get(j);
 						String propertyOut = "【["
-						        + JavaBeanUtil.toString(o, isAnnotation,
-						                isShowNull, isPrint) + "]】";
+						        + JavaBeanUtil.toString(o, isShowNull, isPrint)
+						        + "]】";
 						buffer.append(propertyOut);
 					}
 					buffer.append("}");
@@ -337,21 +318,168 @@ public class JavaBeanUtil
 	/**
 	 * 不打印的annotation
 	 * 
-	 * @author hjin
-	 * @cratedate 2013-5-8 上午8:44:10
 	 * @param field
 	 * @return
-	 * 
+	 * @author hjin
+	 * @cratedate 2013-5-8 上午8:44:10
 	 */
 	public static boolean isPrint(Method method)
 	{
-		boolean flag = true;
-		Print define = method.getAnnotation(Print.class);
-		if (define != null && !define.isPrint())
+		String className = "framework.base.annotation.Print";
+		try
 		{
-			flag = false;
+			Class cls = Class.forName(className);
+			Annotation anno = method.getAnnotation(cls);
+			if (anno != null)
+			{
+				return (Boolean) cls.getMethod("isPrint").invoke(anno);
+			}
+			else
+			{
+				// 没找到Print的注解
+				return true;
+			}
 		}
-		return flag;
-
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			return true;
+		}
 	}
+
+	/**
+	 * 合并两个Method数组
+	 * 
+	 * @author hjin
+	 * @cratedate 2013-12-13 下午2:55:19
+	 * @param arr1
+	 * @param arr2
+	 * @return
+	 * 
+	 */
+	private static Method[] combineMethodArray(Method[] arr1, Method[] arr2)
+	{
+		Method[] result = new Method[arr1.length + arr2.length];
+		for (int i = 0; i < result.length; i++)
+		{
+			if (i < arr1.length)
+			{
+				result[i] = arr1[i];
+			}
+			else
+			{
+				result[i] = arr2[i - arr1.length];
+			}
+		}
+		return result;
+	}
+
+	/**
+	 * 引用自apache StringUtils
+	 * <p>
+	 * Uncapitalizes a String changing the first letter to title case as per
+	 * {@link Character#toLowerCase(char)}. No other letters are changed.
+	 * </p>
+	 * 
+	 * <p>
+	 * For a word based algorithm, see
+	 * {@link org.apache.commons.lang3.text.WordUtils#uncapitalize(String)}. A
+	 * {@code null} input String returns {@code null}.
+	 * </p>
+	 * 
+	 * <pre>
+	 * StringUtils.uncapitalize(null)  = null
+	 * StringUtils.uncapitalize("")    = ""
+	 * StringUtils.uncapitalize("Cat") = "cat"
+	 * StringUtils.uncapitalize("CAT") = "cAT"
+	 * </pre>
+	 * 
+	 * @param str
+	 *            the String to uncapitalize, may be null
+	 * @return the uncapitalized String, {@code null} if null String input
+	 * @see org.apache.commons.lang3.text.WordUtils#uncapitalize(String)
+	 * @see #capitalize(String)
+	 * @since 2.0
+	 */
+	public static String uncapitalize(String str)
+	{
+		int strLen;
+		if (str == null || (strLen = str.length()) == 0)
+		{
+			return str;
+		}
+		return new StringBuilder(strLen)
+		        .append(Character.toLowerCase(str.charAt(0)))
+		        .append(str.substring(1)).toString();
+	}
+
+	/**
+	 * 引用自apache ArrayUtils
+	 * <p>
+	 * Adds all the elements of the given arrays into a new array.
+	 * </p>
+	 * <p>
+	 * The new array contains all of the element of {@code array1} followed by
+	 * all of the elements {@code array2}. When an array is returned, it is
+	 * always a new array.
+	 * </p>
+	 * 
+	 * <pre>
+	 * ArrayUtils.addAll(null, null)     = null
+	 * ArrayUtils.addAll(array1, null)   = cloned copy of array1
+	 * ArrayUtils.addAll(null, array2)   = cloned copy of array2
+	 * ArrayUtils.addAll([], [])         = []
+	 * ArrayUtils.addAll([null], [null]) = [null, null]
+	 * ArrayUtils.addAll(["a", "b", "c"], ["1", "2", "3"]) = ["a", "b", "c", "1", "2", "3"]
+	 * </pre>
+	 * 
+	 * @param <T>
+	 *            the component type of the array
+	 * @param array1
+	 *            the first array whose elements are added to the new array, may
+	 *            be {@code null}
+	 * @param array2
+	 *            the second array whose elements are added to the new array,
+	 *            may be {@code null}
+	 * @return The new array, {@code null} if both arrays are {@code null}. The
+	 *         type of the new array is the type of the first array, unless the
+	 *         first array is null, in which case the type is the same as the
+	 *         second array.
+	 * @since 2.1
+	 * @throws IllegalArgumentException
+	 *             if the array types are incompatible
+	 */
+	public static <T> T[] addAllArrays(T[] array1, T... array2)
+	{
+		final Class<?> type1 = array1.getClass().getComponentType();
+		@SuppressWarnings("unchecked")
+		// OK, because array is of type T
+		T[] joinedArray = (T[]) Array.newInstance(type1, array1.length
+		        + array2.length);
+		System.arraycopy(array1, 0, joinedArray, 0, array1.length);
+		try
+		{
+			System.arraycopy(array2, 0, joinedArray, array1.length,
+			        array2.length);
+		}
+		catch (ArrayStoreException ase)
+		{
+			// Check if problem was due to incompatible types
+			/*
+			 * We do this here, rather than before the copy because: - it would
+			 * be a wasted check most of the time - safer, in case check turns
+			 * out to be too strict
+			 */
+			final Class<?> type2 = array2.getClass().getComponentType();
+			if (!type1.isAssignableFrom(type2))
+			{
+				throw new IllegalArgumentException("Cannot store "
+				        + type2.getName() + " in an array of "
+				        + type1.getName(), ase);
+			}
+			throw ase; // No, so rethrow original
+		}
+		return joinedArray;
+	}
+
 }
