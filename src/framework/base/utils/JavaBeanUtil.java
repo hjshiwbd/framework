@@ -177,7 +177,7 @@ public class JavaBeanUtil
 					continue;
 				}
 
-				if (method.getName().equals("getSerialVersionUID"))
+				if (method.getName().equalsIgnoreCase("getSerialVersionUID"))
 				{
 					continue;
 				}
