@@ -1,54 +1,102 @@
 package tool.app;
 
+import org.apache.commons.lang3.StringUtils;
+import tool.utils.ConnUtils;
+import tool.utils.DBUtils;
+import tool.utils.IOUtils;
+
 import java.sql.Connection;
 import java.util.List;
 import java.util.Map;
 
-import tool.utils.ConnUtils;
-import tool.utils.DBUtils;
-
 /**
- * 
  * @author hjin
  * @cratedate 2013-8-6 上午9:56:15
- * 
  */
 public class MybatisSqlGenerator
 {
+	private final String VARCHAR = "VARCHAR";
+	String newline = "\r\n";
+
+	private String pkg;
+	private String comment = "<!-- %s -->" + newline;
+
+	private String tableName = "";
+	private String beanName = "";
+	private String fileFolder = "";
+
 	public static void main(String[] args)
 	{
-		String tablename = "demo_user";
-		MybatisSqlGenerator templete = new MybatisSqlGenerator(tablename);
-		String sql1 = templete.getMybatisSelect(tablename);
-		System.out.println(sql1);
-
-		String sql2 = templete.getInsert(tablename, "#");
-		System.out.println(sql2);
-
-		String sql3 = templete.getUpdate(tablename, "");
-		System.out.println(sql3);
-
-		String sql4 = templete.getDelete(tablename);
-		System.out.println(sql4);
+		
 	}
 
+	/**
+	 * List[Map[name,type,comment]]
+	 */
 	private List<Map<String, String>> colList;
 
-	public MybatisSqlGenerator(String tableName)
+	/**
+	 * 构造器
+	 * 
+	 * @param tableName
+	 *            数据库表名
+	 * @param beanName
+	 *            javabean名
+	 * @param fileFolder
+	 *            xml生成物理地址
+	 */
+	public MybatisSqlGenerator(String pkg, String tableName, String beanName,
+	        String fileFolder)
 	{
-		Connection conn = ConnUtils.getSSCConn();
-		this.colList = DBUtils.getColList(conn, tableName);
+		this.pkg = pkg;
+		this.tableName = tableName;
+		this.beanName = "\"" + beanName + "\"";
+		this.fileFolder = fileFolder;
+		Connection conn = ConnUtils.getSSCPMConn();
+		// this.colList = DBUtils.getMysqlColList(conn, tableName);
+		this.colList = DBUtils.getOracleColList(conn, tableName);
+	}
+
+	/**
+	 * 生成resultmap映射
+	 * 
+	 * @return
+	 * @author hjin
+	 * @cratedate 2013-9-9 下午1:36:45
+	 */
+	public String getResultMap()
+	{
+		// <resultMap type="LogDefineBean" id="LogDefineMap">
+		String mapperName = beanName.replace("Bean", "Map");
+		String s1 = String.format(comment, "resultMap") + "<resultMap id="
+		        + mapperName + " type=" + beanName + ">" + newline;
+		StringBuffer buffer = new StringBuffer(s1);
+		for (Map<String, String> colmap : colList)
+		{
+			// <result property="cutpoint" column="cutpoint" />
+			String name = colmap.get("name").toLowerCase();
+			String s2 = "<result property=\"" + name + "\" column=\"" + name
+			        + "\" />" + newline;
+			buffer.append(s2);
+		}
+		buffer.append("</resultMap>").append(newline);
+
+		return buffer.toString();
 	}
 
 	/**
 	 * ibatis select
 	 * 
-	 * @param tableName
 	 * @return
 	 */
-	public String getMybatisSelect(String tableName)
+	public String getMybatisSelect()
 	{
-		String sql = "select ";
+		// <select id="selectList" parameterType="DemoUserBean"
+		// resultType="DemoUserBean">
+		String sql = String.format(comment, "select")
+		        + "<select id=\"select\" parameterType=" + beanName
+		        + " resultType=" + beanName + ">" + newline;
+		sql += "select ";
 
 		String whereAppend = "";
 		for (int i = 0; i < colList.size(); i++)
@@ -60,32 +108,39 @@ public class MybatisSqlGenerator
 			if (i == 0)
 			{
 				sql += name;
-			}
-			else
+			} else
 			{
 				sql += ", " + name;
 			}
 
-			/**
-			 * <if test="id!=''"> and id = #{id} </if>
-			 */
-			whereAppend += "<if test=\"" + name + "!=null\">\r\n" + "and "
-			        + name + " = #{" + name + ",jdbcType=" + type + "}\r\n"
-			        + "</if>\r\n";
+			if (type.equals(VARCHAR))
+			{
+				// 字符型
+				// <if test="id!=null and id!=''"> and id = #{id} </if>
+				whereAppend += "<if test=\"" + name + " != null and " + name
+				        + " != ''\">" + newline + "and " + name + " = #{"
+				        + name + ",jdbcType=" + type + "}" + newline + "</if>"
+				        + newline;
+			} else
+			{
+				// <if test="id!=null"> and id = #{id} </if>
+				whereAppend += "<if test=\"" + name + "!=null\">" + newline
+				        + "and " + name + " = #{" + name + ",jdbcType=" + type
+				        + "}" + newline + "</if>" + newline;
+			}
 		}
-		sql += " from " + tableName;
-		sql += " where 1 = 1\r\n" + whereAppend;
+		sql += " from " + tableName + newline;
+		sql += "<where>" + newline + whereAppend + "</where>" + newline;
+		sql += "</select>" + newline;
 		return sql;
 	}
 
 	/**
-	 * 
-	 * @param table
-	 * @param valuetype
+	 * @param valuePlaceholder
 	 *            占位符
 	 * @return
 	 */
-	public String getInsert(String tableName, String valuePlaceholder)
+	public String getInsert(String valuePlaceholder)
 	{
 		String colStr = "";
 		String valStr = "";
@@ -107,16 +162,14 @@ public class MybatisSqlGenerator
 					colStr += name;
 					valStr += valuePlaceholder + "{" + name + ",jdbcType="
 					        + type + "}";
-				}
-				else
+				} else
 				{
 					colStr += ", " + name;
 					valStr += ", " + valuePlaceholder + "{" + name
 					        + ",jdbcType=" + type + "}";
 				}
 			}
-		}
-		else
+		} else
 		{
 			//
 			for (int i = 0; i < colList.size(); i++)
@@ -127,8 +180,7 @@ public class MybatisSqlGenerator
 				{
 					colStr += name;
 					valStr += valuePlaceholder;
-				}
-				else
+				} else
 				{
 					colStr += ", " + name;
 					valStr += ", " + valuePlaceholder;
@@ -136,21 +188,29 @@ public class MybatisSqlGenerator
 			}
 		}
 
-		String result = "insert into " + tableName + " (" + colStr
-		        + ") \r\nvalues (" + valStr + ")\r\n";
+		// <insert id="insert" parameterType="DemoUserBean">
+		String result = String.format(comment, "insert")
+		        + "<insert id=\"insert\" parameterType=" + beanName + ">"
+		        + newline;
+		result += "insert into " + tableName + " (" + colStr + ") " + newline;
+		result += "values (" + valStr + ")" + newline;
+		result += "</insert>" + newline;
 		return result;
 	}
 
 	/**
 	 * mybatis update
 	 * 
-	 * @param tableName
 	 * @param valuePlaceholder
 	 * @return
 	 */
-	public String getUpdate(String tableName, String valuePlaceholder)
+	public String getUpdate(String valuePlaceholder)
 	{
-		String result = "update " + tableName + " set ";
+		// <update id="update" parameterType="DemoUserBean">
+		String result = String.format(comment, "update")
+		        + "<update id=\"update\" parameterType=" + beanName + ">"
+		        + newline;
+		result += "update " + tableName + newline;
 
 		String where = "";
 		String colstr = "";
@@ -163,61 +223,145 @@ public class MybatisSqlGenerator
 			if (i == 0)
 			{
 				where = " where " + name + " = #{" + name + "}";
-				colstr += name + " = #{" + name + "}\r\n";
-			}
-			else
+			} else
 			{
-				// String s = "<isNotNull property=\"" + name
-				// + "\" prepend=\",\">\r\n" + name + " = #" + name
-				// + "#\r\n</isNotNull>\r\n";
-				String s = "<if test=\"" + name + "!=null\">\r\n" + "," + name
-				        + " = #{" + name + ",jdbcType=" + type + "}\r\n"
-				        + "</if>\r\n";
+				String s = "<if test=\"" + name + "!=null\">" + newline + ""
+				        + name + " = #{" + name + ",jdbcType=" + type + "},"
+				        + newline + "</if>" + newline;
 				colstr += s;
 			}
+
 		}
-		result += colstr + where + "\r\n";
+		result += "<set>" + newline + colstr + "</set>" + newline + where + ""
+		        + newline;
+		result += "</update>" + newline;
 		return result;
 	}
 
 	/**
 	 * ibatis delete
 	 * 
-	 * @param tableName
 	 * @return
 	 */
-	public String getDelete(String tableName)
+	public String getDelete()
 	{
 		Map<String, String> map = colList.get(0);
 		String name = map.get("name").toLowerCase();
-		String result = "delete from " + tableName + " where " + name + " = #"
-		        + name + "#";
+		String result = String.format(comment, "delete")
+		        + "<delete id=\"delete\" parameterType=" + beanName + ">"
+		        + newline;
+		result += "delete from " + tableName + " where " + name + " = #" + name
+		        + "#" + newline;
+		result += "</delete>";
 		return result;
+	}
+
+	/**
+	 * 格式化列名,加入前缀
+	 * 
+	 * @param prefix
+	 * @param suffix
+	 * @return
+	 */
+	public String formatColumn(String prefix, String suffix)
+	{
+		String result = ",";
+		for (Map<String, String> map : colList)
+		{
+			String name = map.get("name").toLowerCase();
+
+			String _suffix;
+			if (!StringUtils.isBlank(suffix))
+			{
+				_suffix = " " + suffix + name;
+			} else
+			{
+				_suffix = "";
+			}
+
+			result += prefix + name + _suffix + ", ";
+		}
+		result = result.substring(1);
+		System.out.println(result);
+		return result;
+	}
+
+	/**
+	 * create mybatis mapper file
+	 * 
+	 * @return
+	 * @author hjin
+	 * @cratedate 2013-9-5 上午9:42:42
+	 */
+	public void createMapperFile(boolean isCreateFile)
+	{
+		// xml头
+		String xmlHead = "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\r\n<!DOCTYPE mapper\r\n  "
+		        + "PUBLIC \"-//mybatis.org//DTD Mapper 3.0//EN\" "
+		        + "\"http://mybatis.org/dtd/mybatis-3-mapper.dtd\">" + newline;
+		// 文件内容
+		StringBuffer all = new StringBuffer(xmlHead);
+
+		// 包名
+		String beanFullName = pkg
+		        + beanName.replace("\"", "").replace("Bean", "");
+		all.append("<mapper namespace=\"" + beanFullName + "\">" + newline);
+
+		// 生成sql
+		String valuePlaceholder = "#";
+		all.append(newline);
+		all.append(getResultMap());
+		all.append(newline);
+		all.append(getMybatisSelect());
+		all.append("" + newline);
+		all.append(getInsert(valuePlaceholder));
+		all.append(newline);
+		all.append(getUpdate(valuePlaceholder));
+		all.append(newline);
+		all.append(getDelete());
+		all.append(newline);
+		all.append("</mapper>");
+
+		System.out.println(all);
+
+		if (isCreateFile)
+		{
+			// 写文件
+			String fileName = "mapper-"
+			        + beanName.replace("\"", "").toLowerCase()
+			                .replace("bean", "") + ".xml";
+			IOUtils.createFile(fileFolder, fileName, all.toString());
+		}
 	}
 
 	/**
 	 * oracle数据库类型名称到java类型名称的转换
 	 * 
-	 * @author hjin
-	 * @cratedate 2013-8-6 上午10:15:14
 	 * @param type
 	 * @return
-	 * 
+	 * @author hjin
+	 * @cratedate 2013-8-6 上午10:15:14
 	 */
 	public String convertOracleType(String type)
 	{
+		type = type.toUpperCase();
 		if (type.equals("VARCHAR2"))
 		{
-			type = "VARCHAR";// java.sql.Types.VARCHAR
+			type = VARCHAR;// org.apache.ibatis.type.JdbcType.VARCHAR
 		}
 		if (type.equals("DATE"))
 		{
-			type = "TIMESTAMP";// Types.TIMESTAMP
+			type = "TIMESTAMP";// org.apache.ibatis.type.JdbcType.TIMESTAMP
 		}
-		if (type.equals("NUMBER"))
+		if (type.equals("NUMBER") || type.equals("INT"))
 		{
-			type = "NUMERIC";// Types.NUMERIC
+			type = "NUMERIC";// org.apache.ibatis.type.JdbcType.NUMERIC
 		}
 		return type;
+	}
+
+	public void setTableName(String tableName)
+	{
+		this.tableName = tableName;
 	}
 }

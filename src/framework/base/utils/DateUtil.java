@@ -78,4 +78,18 @@ public class DateUtil
 		return sdf.format(date);
 	}
 
+	/**
+	 * 格式化当前的日期
+	 * 
+	 * @author hjin
+	 * @cratedate 2013-10-31 上午10:40:18
+	 * @param pattern
+	 * @return
+	 * 
+	 */
+	public static String formatToday(String pattern)
+	{
+		Date today = new Date();
+		return formatDate(today, pattern);
+	}
 }

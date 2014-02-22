@@ -36,7 +36,7 @@ public class GenerateJavaBeanFile
 		String beanFileName = "DemoUserBean";
 		// 创建文件包名
 		// String packageName = "com.synjones.iaweb.user.bean";
-		String packageName = "com.synjones.test.bean";
+		String packageName = "demo.bean";
 		createBeanFile(tableName, beanFileName, packageName);
 	}
 
@@ -197,6 +197,6 @@ public class GenerateJavaBeanFile
 		String sid = "whut";
 		String username = "ssc2";
 		String password = "ssc2";
-		conn = ConnUtils.getConn(ip, port, sid, username, password);
+		conn = ConnUtils.getOracleConn(ip, port, sid, username, password);
 	}
 }

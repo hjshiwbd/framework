@@ -49,14 +49,14 @@ public interface IBaseDAOSupport
 	public <T> List<T> selectList(String mybatisId, Object param);
 
 	/**
-	 * 分页查询
+	 * 分页查询.当pager=null时执行selectList
 	 * 
 	 * @author hjin
 	 * @cratedate 2013-8-7 上午11:46:27
 	 * @param mybatisId
 	 * @param param
 	 * @param pager
-	 *            必须初始化curtPage,countPerPage
+	 *            非null时必须初始化curtPage,countPerPage;为null则执行selectList方法.
 	 * @return
 	 * 
 	 */
@@ -106,5 +106,5 @@ public interface IBaseDAOSupport
 	 * @return
 	 * 
 	 */
-	public int selectCount(String sql, Object... param);
+	public int selectCount(String table,String where, Object... param);
 }

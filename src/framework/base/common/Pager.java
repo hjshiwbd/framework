@@ -3,6 +3,9 @@ package framework.base.common;
 import java.io.Serializable;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.github.miemiedev.mybatis.paginator.domain.PageBounds;
 
 import framework.base.annotation.Print;
@@ -12,10 +15,15 @@ import framework.base.annotation.Print;
  * 
  * @author hjin
  * @cratedate 2013-8-7 上午9:23:13
- * 
  */
 public class Pager<T> extends PageBounds implements Serializable
 {
+	private Logger logger = LoggerFactory.getLogger(getClass());
+
+	/**
+	 * @description
+	 */
+	private static final long serialVersionUID = 1L;
 	/**
 	 * 当前页
 	 */
@@ -86,12 +94,20 @@ public class Pager<T> extends PageBounds implements Serializable
 	/**
 	 * 分页样式
 	 */
-	private String style;
+	private String style = "pagination";
+	/**
+	 * 翻页请求的url
+	 */
+	private String url = "#";
 	/**
 	 * 生成html串
 	 */
+	@Print(isPrint = false)
 	private String htmlOutput;
 
+	/**
+	 * mysql分页参数
+	 */
 	private int offset;
 	private int limit;
 
@@ -134,11 +150,98 @@ public class Pager<T> extends PageBounds implements Serializable
 		this.beanName = beanName;
 	}
 
+	/**
+	 * 构建翻页的页面代码
+	 * 
+	 * @return
+	 */
+	public String createHtml()
+	{
+		// 三个模版
+		String template1 = "<div class=" + style + ">{span}</div>";
+		String template2 = "<span><a href={url}?curtPage={index}>{text}</a></span>";
+		String template3 = "<span>{text}</span>";
+
+		// 翻页链接
+		url = url == null ? "#" : url;
+
+		String span = "";
+		// 翻页栏开始页
+		startPage = getStartPage();
+		// 翻页栏结束页
+		endPage = getEndPage();
+		// 翻页栏内个数少于预期时,补齐
+		if ((endPage - startPage) < (indexLength - 1) && endPage > 1)
+		{
+			startPage = endPage - indexLength + 1;
+		}
+		startPage = startPage < 1 ? 1 : startPage;
+
+		// 循环,构成html
+		for (int i = startPage; i <= endPage; i++)
+		{
+			if (i != curtPage)
+			{
+				span += template2.replace("{index}", i + "")
+				        .replace("{text}", i + "").replace("{url}", url);
+			}
+			else
+			{
+				// 当前显示页,无link
+				span += template3.replace("{text}", i + "");
+			}
+		}
+
+		// 首页
+		String first = template2.replace("{index}", 1 + "")
+		        .replace("{text}", "首页").replace("{url}", url);
+		// 末页
+		String last = template2.replace("{index}", totalPage + "")
+		        .replace("{text}", "末页").replace("{url}", url);
+
+		// 拼接
+		String allHtml = "";
+		// System.out.println(curtPage + "," + totalPage + "," + startPage + ","
+		// + endPage);
+		if (curtPage == 1 && curtPage != totalPage)
+		{
+			// 是否首页
+			allHtml = span + last;
+		}
+		else if (curtPage != 1 && curtPage == totalPage)
+		{
+			// 是否末页
+			allHtml = first + span;
+		}
+		else if (curtPage == totalPage && curtPage == 1)
+		{
+			// 既是首页也是末页,总页数=1
+			allHtml = span;
+		}
+		else
+		{
+			// 其他
+			allHtml = first + span + last;
+		}
+
+		String result = template1.replace("{span}", allHtml);
+		if (logger.isDebugEnabled())
+		{
+			logger.debug(result);
+		}
+		return result;
+	}
+
+	/**
+	 * 计算当前页
+	 * 
+	 * @return
+	 */
 	public int getCurtPage()
 	{
 		if (getTotalPage() > 0 && curtPage > getTotalPage())
 		{
-			curtPage = getTotal();
+			curtPage = getTotalPage();
 		}
 		if (curtPage < 1)
 		{
@@ -186,6 +289,8 @@ public class Pager<T> extends PageBounds implements Serializable
 
 	public int getIndexLength()
 	{
+		indexLength = indexLength > getTotalPage() ? getTotalPage()
+		        : getIndexLength();
 		return indexLength;
 	}
 
@@ -196,6 +301,11 @@ public class Pager<T> extends PageBounds implements Serializable
 
 	public int getStartPage()
 	{
+		startPage = curtPage - (indexLength / 2);
+		if (startPage < 1)
+		{
+			startPage = 1;
+		}
 		return startPage;
 	}
 
@@ -206,6 +316,11 @@ public class Pager<T> extends PageBounds implements Serializable
 
 	public int getEndPage()
 	{
+		endPage = getStartPage() + indexLength - 1;
+		if (endPage > getTotalPage())
+		{
+			endPage = getTotalPage();
+		}
 		return endPage;
 	}
 
@@ -236,6 +351,7 @@ public class Pager<T> extends PageBounds implements Serializable
 
 	public String getHtmlOutput()
 	{
+		htmlOutput = createHtml();
 		return htmlOutput;
 	}
 
@@ -320,15 +436,21 @@ public class Pager<T> extends PageBounds implements Serializable
 	public int getOffset()
 	{
 		offset = (curtPage - 1) * countPerPage;
-		if (offset == 0)
-		{
-			offset = 1;
-		}
 		return offset;
 	}
 
 	public void setOffset(int offset)
 	{
 		this.offset = offset;
+	}
+
+	public String getUrl()
+	{
+		return url;
+	}
+
+	public void setUrl(String url)
+	{
+		this.url = url;
 	}
 }

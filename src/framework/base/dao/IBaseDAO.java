@@ -14,6 +14,16 @@ import framework.base.common.Pager;
 public interface IBaseDAO
 {
 	/**
+	 * mapper命名空间的前缀
+	 * 
+	 * @author hjin
+	 * @cratedate 2013-9-5 上午11:28:55
+	 * @return
+	 * 
+	 */
+	public String getNamespace();
+
+	/**
 	 * 保存对象
 	 * 
 	 * @author hjin
@@ -79,4 +89,15 @@ public interface IBaseDAO
 	 * 
 	 */
 	public <E> Pager<E> selectPage(Object param, Pager<E> pager);
+
+	/**
+	 * 行数查询
+	 * 
+	 * @author hjin
+	 * @cratedate 2013-9-15 下午9:22:01
+	 * @return
+	 * 
+	 */
+	public int selectCount(String table,String where, Object... param);
+
 }

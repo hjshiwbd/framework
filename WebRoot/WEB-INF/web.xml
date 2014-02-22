@@ -5,6 +5,12 @@
 	http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd">
 	<display-name>framework</display-name>
 
+	<!-- spring配置文件路径 -->
+	<context-param>
+		<param-name>contextConfigLocation</param-name>
+		<param-value>classpath:demo/config/spring/spring-applicationContext.xml</param-value>
+	</context-param>
+
 	<!-- 字符编码 -->
 	<filter>
 		<filter-name>CharacterEncodingFilter</filter-name>
@@ -36,7 +42,7 @@
 
 		<init-param>
 			<param-name>contextConfigLocation</param-name>
-			<param-value>classpath:com/synjones/test/config/spring/spring-servlet.xml</param-value>
+			<param-value>classpath:demo/config/spring/spring-servlet.xml</param-value>
 		</init-param>
 
 		<load-on-startup>1</load-on-startup>
@@ -47,11 +53,13 @@
 		<url-pattern>/</url-pattern>
 	</servlet-mapping>
 
-	<context-param>
-		<param-name>contextConfigLocation</param-name>
-		<param-value>classpath:com/synjones/test/config/spring/spring-applicationContext.xml</param-value>
-	</context-param>
+	<!-- 应用初始化 -->
+	<servlet>
+		<servlet-name>serverInit</servlet-name>
+		<servlet-class></servlet-class>
+	</servlet>
 
+	<!-- 默认首页 -->
 	<welcome-file-list>
 		<welcome-file>index.jsp</welcome-file>
 	</welcome-file-list>

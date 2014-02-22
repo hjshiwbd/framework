@@ -8,5 +8,4 @@ package framework.base.service;
  */
 public interface IBaseService
 {
-
 }
