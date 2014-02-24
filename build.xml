@@ -1,4 +1,4 @@
-<project name="ca" default="dist" basedir=".">
+<project name="framework" default="dist" basedir=".">
 
     <property name="src" value="src/framework"/>
 
