@@ -17,7 +17,7 @@ import framework.base.utils.ReflectUtil;
 
 /**
  * 构造三层框架文件夹及文件
- *
+ * 
  * @author hjin
  * @cratedate 2013-9-14 下午7:02:33
  */
@@ -25,6 +25,10 @@ public class CreateStructFolders
 {
     private final String newline = "\r\n";
 
+    /**
+     * 模板文件夹路径
+     */
+    private String templateDir;
     /**
      * 模块包."."分隔
      */
@@ -68,7 +72,14 @@ public class CreateStructFolders
 
     public static void main(String[] args) throws Exception
     {
-    	
+        String templateDir = "F:/!job/github/framework";
+        String pkgModule = "com.jap";
+        String pkgMapper = "com.jap";
+        String module = "word";
+        String author = "hjin";
+        CreateStructFolders struct = new CreateStructFolders(templateDir,
+                pkgModule, pkgMapper, module, author);
+        struct.execute();
     }
 
     public CreateStructFolders()
@@ -78,15 +89,17 @@ public class CreateStructFolders
 
     /**
      * 构造器
-     *
+     * 
      * @param pkgModule
      * @param pkgMapper
      * @param module
      * @param author
      */
-    public CreateStructFolders(String pkgModule, String pkgMapper,
-                               String module, String author)
+    public CreateStructFolders(String templateDir, String pkgModule,
+            String pkgMapper, String module, String author)
     {
+        this.templateDir = templateDir;
+
         this.module_pkg = pkgModule;
         pkgModuleFolder = pkgModule.replace(".", "/");
 
@@ -107,14 +120,13 @@ public class CreateStructFolders
     {
         // 当前项目目录
         // F:\!job\svn\files\iispace\iiSpaceTeam\iiSpace0.1_code\framework
-        //F:\svn\iispace\iiSpaceTeam\iiSpace0.1_code\framework
-        String dir = "F:\\svn\\iispace\\iiSpaceTeam\\iiSpace0.1_code\\framework";//System.getProperty("user.dir");
+        // F:\svn\iispace\iiSpaceTeam\iiSpace0.1_code\framework
         // 模板路径
-        String tplDir = dir + "/templet/[module_lower]";
+        String tplDir = templateDir + "/templet/[module_lower]";
         // 模板文件夹
         File src = new File(tplDir);
         // 复制到此路径
-        File dest = new File(dir + "/templet/temp/" + module_lower);
+        File dest = new File(templateDir + "/templet/temp/" + module_lower);
         // 父路径存在,则删除
         if (dest.exists())
         {
@@ -129,7 +141,7 @@ public class CreateStructFolders
 
     /**
      * 遍历文件夹
-     *
+     * 
      * @author hjin
      * @cratedate 2013-9-14 下午7:56:20
      */
@@ -145,8 +157,7 @@ public class CreateStructFolders
                 {
                     // 正则解析替换所有表达式
                     createJavaFile(child);
-                }
-                else
+                } else
                 {
                     invokeFolder(child);
                 }
@@ -156,7 +167,7 @@ public class CreateStructFolders
 
     /**
      * 根据模板tpl创建java文件
-     *
+     * 
      * @param file
      * @author hjin
      * @cratedate 2013-9-14 下午8:00:05
@@ -206,7 +217,7 @@ public class CreateStructFolders
 
     /**
      * 正则替换
-     *
+     * 
      * @return
      * @author hjin
      * @cratedate 2013-9-14 下午8:09:07
