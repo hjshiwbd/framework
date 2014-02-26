@@ -28,6 +28,7 @@ public class MybatisSqlGenerator
     private String tableName = "";
     private String beanName = "";
     private String fileFolder = "";
+    private String dbType = "";
 
     public static void main(String[] args)
     {
@@ -41,26 +42,25 @@ public class MybatisSqlGenerator
 
     /**
      * 构造器
-     * 
-     * @param tableName
-     *            数据库表名
-     * @param beanName
-     *            javabean名
-     * @param fileFolder
-     *            xml生成物理地址
+     *
+     * @param tableName  数据库表名
+     * @param beanName   javabean名
+     * @param fileFolder xml生成物理地址
      */
     public MybatisSqlGenerator(Connection conn, String pkg, String tableName,
-            String beanName, String fileFolder, String dbType)
+                               String beanName, String fileFolder, String dbType)
     {
         this.pkg = pkg;
         this.tableName = tableName;
         this.beanName = "\"" + beanName + "\"";
         this.fileFolder = fileFolder;
+        this.dbType = dbType;
 
         if (dbType.equals(DB_TYPE_MYSQL))
         {
             colList = DBUtils.getMysqlColList(conn, tableName);
-        } else if (dbType.equals(DB_TYPE_ORACLE))
+        }
+        else if (dbType.equals(DB_TYPE_ORACLE))
         {
             colList = DBUtils.getOracleColList(conn, tableName);
         }
@@ -68,7 +68,7 @@ public class MybatisSqlGenerator
 
     /**
      * 生成resultMap映射
-     * 
+     *
      * @return
      * @author hjin
      * @cratedate 2013-9-9 下午1:36:45
@@ -95,7 +95,7 @@ public class MybatisSqlGenerator
 
     /**
      * ibatis select
-     * 
+     *
      * @return
      */
     public String getMybatisSelect()
@@ -113,11 +113,12 @@ public class MybatisSqlGenerator
             Map<String, String> map = colList.get(i);
             String name = map.get("name").toLowerCase();
             String type = map.get("type");
-            type = convertOracleType(type);
+            type = convertType(type);
             if (i == 0)
             {
                 sql += name;
-            } else
+            }
+            else
             {
                 sql += ", " + name;
             }
@@ -130,7 +131,8 @@ public class MybatisSqlGenerator
                         + " != ''\">" + newline + "and " + name + " = #{"
                         + name + ",jdbcType=" + type + "}" + newline + "</if>"
                         + newline;
-            } else
+            }
+            else
             {
                 // <if test="id!=null"> and id = #{id} </if>
                 whereAppend += "<if test=\"" + name + "!=null\">" + newline
@@ -145,8 +147,7 @@ public class MybatisSqlGenerator
     }
 
     /**
-     * @param valuePlaceholder
-     *            占位符
+     * @param valuePlaceholder 占位符
      * @return
      */
     public String getInsert(String valuePlaceholder)
@@ -164,21 +165,23 @@ public class MybatisSqlGenerator
                 String name = map.get("name").toLowerCase();
                 // 数据类型
                 String type = map.get("type");
-                type = convertOracleType(type);
+                type = convertType(type);
 
                 if (i == 0)
                 {
                     colStr += name;
                     valStr += valuePlaceholder + "{" + name + ",jdbcType="
                             + type + "}";
-                } else
+                }
+                else
                 {
                     colStr += ", " + name;
                     valStr += ", " + valuePlaceholder + "{" + name
                             + ",jdbcType=" + type + "}";
                 }
             }
-        } else
+        }
+        else
         {
             //
             for (int i = 0; i < colList.size(); i++)
@@ -189,7 +192,8 @@ public class MybatisSqlGenerator
                 {
                     colStr += name;
                     valStr += valuePlaceholder;
-                } else
+                }
+                else
                 {
                     colStr += ", " + name;
                     valStr += ", " + valuePlaceholder;
@@ -209,7 +213,7 @@ public class MybatisSqlGenerator
 
     /**
      * mybatis update
-     * 
+     *
      * @param valuePlaceholder
      * @return
      */
@@ -228,11 +232,12 @@ public class MybatisSqlGenerator
             Map<String, String> map = colList.get(i);
             String name = map.get("name").toLowerCase();
             String type = map.get("type");
-            type = convertOracleType(type);
+            type = convertType(type);
             if (i == 0)
             {
                 where = " where " + name + " = #{" + name + "}";
-            } else
+            }
+            else
             {
                 String s = "<if test=\"" + name + "!=null\">" + newline + ""
                         + name + " = #{" + name + ",jdbcType=" + type + "},"
@@ -249,25 +254,26 @@ public class MybatisSqlGenerator
 
     /**
      * ibatis delete
-     * 
+     *
      * @return
      */
     public String getDelete()
     {
         Map<String, String> map = colList.get(0);
         String name = map.get("name").toLowerCase();
+        String type = map.get("type").toLowerCase();
         String result = String.format(comment, "delete")
                 + "<delete id=\"delete\" parameterType=" + beanName + ">"
                 + newline;
-        result += "delete from " + tableName + " where " + name + " = #" + name
-                + "#" + newline;
+        result += "delete from " + tableName + " where " + name
+                + " = #{" + name + ",jdbcType=" + type + "}" + newline;
         result += "</delete>";
         return result;
     }
 
     /**
      * 格式化列名,加入前缀
-     * 
+     *
      * @param prefix
      * @param suffix
      * @return
@@ -283,7 +289,8 @@ public class MybatisSqlGenerator
             if (!StringUtils.isBlank(suffix))
             {
                 _suffix = " " + suffix + name;
-            } else
+            }
+            else
             {
                 _suffix = "";
             }
@@ -297,7 +304,7 @@ public class MybatisSqlGenerator
 
     /**
      * create mybatis mapper file
-     * 
+     *
      * @return
      * @author hjin
      * @cratedate 2013-9-5 上午9:42:42
@@ -338,33 +345,52 @@ public class MybatisSqlGenerator
             // 写文件
             String fileName = "mapper-"
                     + beanName.replace("\"", "").toLowerCase()
-                            .replace("bean", "") + ".xml";
+                    .replace("bean", "") + ".xml";
             IOUtils.createFile(fileFolder, fileName, all.toString());
         }
     }
 
     /**
      * oracle数据库类型名称到java类型名称的转换
-     * 
+     *
      * @param type
      * @return
      * @author hjin
      * @cratedate 2013-8-6 上午10:15:14
      */
-    public String convertOracleType(String type)
+    public String convertType(String type)
     {
         type = type.toUpperCase();
-        if (type.equals("VARCHAR2"))
+
+        if (DB_TYPE_ORACLE.equals(dbType))
         {
-            type = VARCHAR;// org.apache.ibatis.type.JdbcType.VARCHAR
+            if (type.equals("VARCHAR2"))
+            {
+                type = VARCHAR;// org.apache.ibatis.type.JdbcType.VARCHAR
+            }
+            if (type.equals("DATE"))
+            {
+                type = "TIMESTAMP";// org.apache.ibatis.type.JdbcType.TIMESTAMP
+            }
+            if (type.equals("NUMBER") || type.equals("INT"))
+            {
+                type = "NUMERIC";// org.apache.ibatis.type.JdbcType.NUMERIC
+            }
         }
-        if (type.equals("DATE"))
+        else if (DB_TYPE_MYSQL.equals(dbType))
         {
-            type = "TIMESTAMP";// org.apache.ibatis.type.JdbcType.TIMESTAMP
-        }
-        if (type.equals("NUMBER") || type.equals("INT"))
-        {
-            type = "NUMERIC";// org.apache.ibatis.type.JdbcType.NUMERIC
+            if (type.equals("VARCHAR"))
+            {
+                type = VARCHAR;// org.apache.ibatis.type.JdbcType.VARCHAR
+            }
+            if (type.equals("DATE"))
+            {
+                type = "TIMESTAMP";// org.apache.ibatis.type.JdbcType.TIMESTAMP
+            }
+            if (type.equals("NUMBER") || type.equals("INT"))
+            {
+                type = "NUMERIC";// org.apache.ibatis.type.JdbcType.NUMERIC
+            }
         }
         return type;
     }
