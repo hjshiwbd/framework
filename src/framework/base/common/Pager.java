@@ -148,14 +148,26 @@ public class Pager<T> extends PageBounds implements Serializable
     /**
      * 构建翻页的页面代码
      *
-     * @return
+     * @return html str
      */
     public String createHtml()
     {
+        // hidden input
+        String prefix = "pager_";
+        String inputTemplate = "<input type=\"hidden\" name=\"" + prefix + "{paramName}\" id=\"" + prefix + "{paramName}\" value=\"{value}\" />";
+        String curtPageInput = inputTemplate.replace("{paramName}", "curtPageInput").replace("{value}", curtPage + "");
+        String countPerPageInput = inputTemplate.replace("{paramName}", "countPerPageInput").replace("{value}", countPerPage + "");
+        String totalInput = inputTemplate.replace("{paramName}", "totalInput").replace("{value}", total + "");
+        String totalPageInput = inputTemplate.replace("{paramName}", "totalPageInput").replace("{value}", getTotalPage() + "");// totalPage需要用get方式计算得到
+
         // 三个模版
-        String template1 = "<div class=\"" + style + "\">{span}</div>";
-        String template2 = "<span><a class=\"pageIndex\" pageIndex=\"{index}\" href=\"{url}?curtPage={index}\" onclick=\"{clickMethod}\">{text}</a></span>";
-        String template3 = "<span>{text}</span>";
+        String template1 = "<div class=\"" + style + "\">" + curtPageInput + countPerPageInput + totalInput + totalPageInput + "{span}</div>";
+        String template2 = "<span class=\"{class}\"><a class=\"pageIndex\" pageIndex=\"{index}\" href=\"{url}?curtPage={index}\" onclick=\"{clickMethod}\">{text}</a></span>";
+        String template3 = "<span class=\"{class}\">{text}</span>";
+
+        // 样式名称
+        String classLinkOn = "linkon";
+        String classLinkOff = "linkoff";
 
         // 翻页链接
         url = url == null ? "#" : url;
@@ -178,21 +190,21 @@ public class Pager<T> extends PageBounds implements Serializable
         {
             if (i != curtPage)
             {
-                span += template2.replace("{index}", i + "")
+                span += template2.replace("{class}", classLinkOn).replace("{index}", i + "")
                         .replace("{text}", i + "").replace("{url}", url).replace("{clickMethod}", clickMethod);
             }
             else
             {
                 // 当前显示页,无link
-                span += template3.replace("{text}", i + "");
+                span += template3.replace("{class}", classLinkOff).replace("{text}", i + "");
             }
         }
 
         // 首页
-        String first = template2.replace("{index}", 1 + "")
+        String first = template2.replace("{class}", classLinkOn).replace("{index}", 1 + "")
                 .replace("{text}", "首页").replace("{url}", url).replace("{clickMethod}", clickMethod);
         // 末页
-        String last = template2.replace("{index}", totalPage + "")
+        String last = template2.replace("{class}", classLinkOn).replace("{index}", totalPage + "")
                 .replace("{text}", "末页").replace("{url}", url).replace("{clickMethod}", clickMethod);
 
         // 拼接
@@ -209,7 +221,7 @@ public class Pager<T> extends PageBounds implements Serializable
             // 是否末页
             allHtml = first + span;
         }
-        else if (curtPage == totalPage && curtPage == 1)
+        else if (curtPage == totalPage)
         {
             // 既是首页也是末页,总页数=1
             allHtml = span;
