@@ -27,11 +27,19 @@ public class Pager<T> extends PageBounds implements Serializable
     /**
      * 当前页
      */
-    private int curtPage = 1;
+    private Integer curtPage = 1;
     /**
      * 每页行数
      */
-    private int countPerPage = 15;
+    private Integer countPerPage = 15;
+    /**
+     * 总行数
+     */
+    private Integer total = 0;
+    /**
+     * 总页数
+     */
+    private Integer totalPage;
 
     /**
      * 需要分页的表
@@ -62,14 +70,6 @@ public class Pager<T> extends PageBounds implements Serializable
      * List的泛型.需要返回的bean对象，即把结果集放入到哪个bean中
      */
     private String beanName = "";
-    /**
-     * 总行数
-     */
-    private int total = 0;
-    /**
-     * 总页数
-     */
-    private int totalPage;
 
     /**
      * 翻页处显示的长度.如:显示...[3][4][5][6][7]...时,长度为5,其余均以...来省略.赋值奇数为宜.
@@ -245,7 +245,7 @@ public class Pager<T> extends PageBounds implements Serializable
      *
      * @return
      */
-    public int getCurtPage()
+    public Integer getCurtPage()
     {
         if (getTotalPage() > 0 && curtPage > getTotalPage())
         {
@@ -258,39 +258,39 @@ public class Pager<T> extends PageBounds implements Serializable
         return curtPage;
     }
 
-    public void setCurtPage(int curtPage)
+    public void setCurtPage(Integer curtPage)
     {
         this.curtPage = curtPage;
     }
 
-    public int getCountPerPage()
+    public Integer getCountPerPage()
     {
         return countPerPage;
     }
 
-    public void setCountPerPage(int countPerPage)
+    public void setCountPerPage(Integer countPerPage)
     {
         this.countPerPage = countPerPage;
     }
 
-    public int getTotal()
+    public Integer getTotal()
     {
         return total;
     }
 
-    public void setTotal(int total)
+    public void setTotal(Integer total)
     {
         this.total = total;
     }
 
-    public int getTotalPage()
+    public Integer getTotalPage()
     {
         totalPage = total % countPerPage == 0 ? total / countPerPage : total
                 / countPerPage + 1;
         return totalPage;
     }
 
-    public void setTotalPage(int totalPage)
+    public void setTotalPage(Integer totalPage)
     {
         this.totalPage = totalPage;
     }
