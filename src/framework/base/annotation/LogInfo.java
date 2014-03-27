@@ -22,5 +22,5 @@ public @interface LogInfo
 	 * @return
 	 *
 	 */
-	String value();
+	String value() default "";
 }

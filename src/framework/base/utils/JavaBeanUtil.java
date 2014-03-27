@@ -11,6 +11,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import framework.base.bean.BaseBean;
+
 /**
  * javabean基础类
  * 
@@ -174,8 +176,7 @@ public class JavaBeanUtil
 				String fieldName = uncapitalize(methodName.substring(3));
 
 				// 反射得到get方法的执行结果
-				Object methodResult = invokeMethodNoParam(cls,
-				        methodName, obj);
+				Object methodResult = invokeMethodNoParam(cls, methodName, obj);
 
 				// 转换执行结果->string,用于打印输出
 				if (methodResult instanceof List)
@@ -237,15 +238,32 @@ public class JavaBeanUtil
 					}
 					else
 					{
-						String result = methodResult.toString();
-						if (notNullProp == 0)
+						if (methodResult instanceof BaseBean)
 						{
-							buffer.append(fieldName + "=" + result);
+							if (notNullProp == 0)
+							{
+								buffer.append(fieldName + "=["
+								        + toString(methodResult) + "]");
+							}
+							else
+							{
+								buffer.append("," + fieldName + "=["
+								        + toString(methodResult) + "]");
+							}
 						}
 						else
 						{
-							buffer.append("," + fieldName + "=" + result);
+							String result = methodResult.toString();
+							if (notNullProp == 0)
+							{
+								buffer.append(fieldName + "=" + result);
+							}
+							else
+							{
+								buffer.append("," + fieldName + "=" + result);
+							}
 						}
+
 						notNullProp++;
 					}
 				}
