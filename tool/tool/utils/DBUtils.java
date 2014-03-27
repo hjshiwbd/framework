@@ -74,15 +74,18 @@ public class DBUtils
 	 * @return List[Map[name,type,comment]]
 	 */
 	public static List<Map<String, String>> getMysqlColList(Connection conn,
-	        String tableName)
+	        String databaseName, String tableName)
 	{
 		List<Map<String, String>> list = new ArrayList<Map<String, String>>();
-		String sql = "select t.COLUMN_NAME,t.DATA_TYPE,t.COLUMN_COMMENT from information_schema.`COLUMNS` t where table_name = ?";
+		String sql = "select t.COLUMN_NAME,t.DATA_TYPE,t.COLUMN_COMMENT from information_schema.`COLUMNS` t where table_name = ? and table_schema = ?";
 		// System.out.println(sql);
+		// System.out.println("param1:" + tableName);
+		// System.out.println("param2:" + databaseName);
 		try
 		{
 			ps = conn.prepareStatement(sql);
 			ps.setString(1, tableName.toUpperCase());
+			ps.setString(2, databaseName.toUpperCase());
 			rs = ps.executeQuery();
 			while (rs.next())
 			{
