@@ -25,13 +25,7 @@ public abstract class LogHandlerSupport implements ILogHandler
 	protected LogDefineBean logDefine;
 	protected HttpServletRequest request;
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * com.iispace.web.portal.aop.ILogHandler#getLogContent(java.lang.String,
-	 * java.lang.Object[])
-	 */
+	@Override
 	public String getLogContent(ILogHandler target, LogDefineBean logDefine,
 	        HttpServletRequest request)
 	{
