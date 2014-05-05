@@ -298,7 +298,7 @@ public class Pager<T> extends PageBounds implements Serializable
     public int getIndexLength()
     {
         indexLength = indexLength > getTotalPage() ? getTotalPage()
-                : getIndexLength();
+                : indexLength;
         return indexLength;
     }
 
