@@ -244,12 +244,12 @@ public class ReflectUtil
 	{
 		if (target == null)
 		{
-			logger.info("target is null");
+			logger.error("target is null");
 			return null;
 		}
 		if (method == null)
 		{
-			logger.info("method is null");
+			logger.error("method is null");
 			return null;
 		}
 		return ReflectionUtils.invokeMethod(method, target, parameters);
