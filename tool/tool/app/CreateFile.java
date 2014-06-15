@@ -12,36 +12,44 @@ public class CreateFile
 		createFile();
 
 		// struct
-		createStructure();
+//		createStructure();
 	}
 
 	public static void createFile()
 	{
-		String databaseName = "demo";
-		String tableName = "p_test";
-		String beanFileName = "TestBean";
-		String packageName = "com.jap.bean";
-		String folderPath = "F:/workspaces/eclipse_jee_20140222/jap/src/com/jap/bean";
-		CreateJavaBeanFile c = new CreateJavaBeanFile(getConn(), databaseName,
-		        tableName, beanFileName, packageName, folderPath,
-		        CreateJavaBeanFile.DB_TYPE_MYSQL);
+		String dbtype = MybatisSqlGenerator.DB_TYPE_ORACLE;
+		String databaseName = "photo";// 仅用于mysql的colList查询
+		String tableName = "t_image";
+		String beanFileName = "ImageBean";
+		String packageName = "cn.edu.whut.photo.bean";
+		String folderPath = "F:/svn/mine/weiyun/hjin/project/photo/code/photo/src/cn/edu/whut/photo/bean";
+
+		CreateJavaBeanFile c = new CreateJavaBeanFile(getConn(dbtype),
+		        databaseName, tableName, beanFileName, packageName, folderPath,
+		        CreateJavaBeanFile.DB_TYPE_ORACLE);
 		c.createBeanFile(true);
 
-		String mybatisFolder = "F:/workspaces/eclipse_jee_20140222/jap/src/config/mybatis";
-		packageName = "com.jap.mapper.";
-		MybatisSqlGenerator mybatis = new MybatisSqlGenerator(getConn(),
+		String mybatisFolder = "F:/svn/mine/weiyun/hjin/project/photo/code/photo/src/config/mybatis";
+		packageName = "cn.edu.whut.photo.mapper.";
+		MybatisSqlGenerator mybatis = new MybatisSqlGenerator(getConn(dbtype),
 		        packageName, databaseName, tableName, beanFileName,
-		        mybatisFolder, MybatisSqlGenerator.DB_TYPE_MYSQL);
+		        mybatisFolder, MybatisSqlGenerator.DB_TYPE_ORACLE);
 		mybatis.createMapperFile(true);
+	}
+
+	public static Connection getConn(String dbtype)
+	{
+		return dbtype.equals(MybatisSqlGenerator.DB_TYPE_ORACLE) ? getOracleConn()
+		        : getMysqlConn();
 	}
 
 	public static void createStructure() throws Exception
 	{
 		String templateDir = "F:/github/framework";
-		String pkgModule = "com.jap";
-		String pkgMapper = "com.jap.mapper";
-		String module = "test";
-		String author = "wy";
+		String pkgModule = "cn.edu.whut.photo";
+		String pkgMapper = "cn.edu.whut.photo.mapper";
+		String module = "image";
+		String author = "hjin";
 		CreateStructFolders struct = new CreateStructFolders(templateDir,
 		        pkgModule, pkgMapper, module, author);
 		struct.execute();
@@ -51,7 +59,7 @@ public class CreateFile
 	/**
 	 * jdbc数据库连接
 	 */
-	public static Connection getConn()
+	public static Connection getMysqlConn()
 	{
 		String ip = "localhost";
 		String port = "3306";
@@ -59,5 +67,18 @@ public class CreateFile
 		String username = "root";
 		String password = "root";
 		return ConnUtils.getMysqlConn(ip, port, dbname, username, password);
+	}
+
+	/**
+	 * jdbc数据库连接
+	 */
+	public static Connection getOracleConn()
+	{
+		String ip = "202.114.93.215";
+		String port = "1521";
+		String dbname = "orcl";
+		String username = "photo";
+		String password = "photo";
+		return ConnUtils.getOracleConn(ip, port, dbname, username, password);
 	}
 }

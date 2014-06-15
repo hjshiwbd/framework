@@ -10,6 +10,7 @@ import org.apache.http.NameValuePair;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.ResponseHandler;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -93,14 +94,22 @@ public class UrlUtil
 			HttpPost httpPost = new HttpPost(url);
 			if (postParams != null)
 			{
-				httpPost.setEntity(new UrlEncodedFormEntity(postParams,
-				        encoding));
+		        httpPost.setEntity(new UrlEncodedFormEntity(postParams));
 			}
-			logger.info("post url:" + url);
-			logger.info("post param:" + postParams);
-			SimpleResponseHandler responseHandler = new SimpleResponseHandler(
-			        encoding);
-			responseBody = httpclient.execute(httpPost, responseHandler);
+//			logger.info("post url:" + url);
+//			logger.info("post param:" + postParams);
+//			SimpleResponseHandler responseHandler = new SimpleResponseHandler(
+//			        encoding);
+//			responseBody = httpclient.execute(httpPost, responseHandler);
+
+	        CloseableHttpResponse response = httpclient.execute(httpPost);
+
+	        HttpEntity entity = response.getEntity();
+	        responseBody = EntityUtils.toString(entity, encoding).trim();
+	        // 关闭连接
+	        EntityUtils.consume(entity);
+
+	        response.close();
 		}
 		catch (UnsupportedEncodingException e)
 		{
