@@ -249,6 +249,10 @@ public class CommonUtil
      */
     public static String getIpAddr(HttpServletRequest request)
     {
+    	if (request == null)
+        {
+	        return null;
+        }
         String ip = request.getHeader("x-forwarded-for");
         if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip))
         {
