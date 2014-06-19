@@ -15,6 +15,7 @@ import framework.base.controller.BaseController;
  */
 @Controller
 @RequestMapping("/[module_lower]")
+@SuppressWarnings("serial")
 public class [module_cap]Controller extends BaseController
 {
 	private static final long serialVersionUID = 1L;
