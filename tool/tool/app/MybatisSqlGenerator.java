@@ -267,6 +267,10 @@ public class MybatisSqlGenerator
 		Map<String, String> map = colList.get(0);
 		String name = map.get("name").toLowerCase();
 		String type = map.get("type").toLowerCase();
+		if (type.equals("varchar2"))
+		{
+			type = "varchar";
+		}
 		String result = String.format(comment, "delete")
 		        + "<delete id=\"delete\" parameterType=" + beanName + ">"
 		        + newline;

@@ -95,6 +95,14 @@ public class Pager<T> extends PageBounds implements Serializable
 	 */
 	private String style = "pagination";
 	/**
+	 * 当前页的按钮
+	 */
+	private String classLinkOn = "linkon";
+	/**
+	 * 非当前页的按钮
+	 */
+	private String classLinkOff = "linkoff";
+	/**
 	 * 翻页请求的url
 	 */
 	private String url = "#";
@@ -105,7 +113,7 @@ public class Pager<T> extends PageBounds implements Serializable
 	/**
 	 * 生成html串
 	 */
-	private String htmlOutput;
+	private String html;
 
 	/**
 	 * mysql分页参数
@@ -174,15 +182,14 @@ public class Pager<T> extends PageBounds implements Serializable
 		        "totalPageInput").replace("{value}", getTotalPage() + "");// totalPage需要用get方式计算得到
 
 		// 三个模版
+		// 全部span
 		String template1 = "<div class=\"" + style + "\">" + curtPageInput
 		        + countPerPageInput + totalInput + totalPageInput
 		        + "{span}</div>";
+		// 有link
 		String template2 = "<span class=\"{class}\"><a class=\"pageIndex\" pageIndex=\"{index}\" href=\"{url}?curtPage={index}\" onclick=\"{clickMethod}\">{text}</a></span>";
+		// 无link
 		String template3 = "<span class=\"{class}\">{text}</span>";
-
-		// 样式名称
-		String classLinkOn = "linkon";
-		String classLinkOff = "linkoff";
 
 		// 翻页链接
 		url = url == null ? "#" : url;
@@ -226,42 +233,45 @@ public class Pager<T> extends PageBounds implements Serializable
 		String last = template2.replace("{class}", classLinkOn)
 		        .replace("{index}", totalPage + "").replace("{text}", "末页")
 		        .replace("{url}", url).replace("{clickMethod}", clickMethod);
-
 		// 上一页
+		String prevPage = String
+		        .valueOf(curtPage - 1 == 0 ? "1" : curtPage - 1);
 		String prev = template2.replace("{class}", classLinkOn)
-		        .replace("{index}", String.valueOf(curtPage - 1))
-		        .replace("{text}", "上页").replace("{url}", url)
-		        .replace("{clickMethod}", clickMethod);
+		        .replace("{index}", prevPage).replace("{text}", "上页")
+		        .replace("{url}", url).replace("{clickMethod}", clickMethod);
 		// 下一页
+		String nextPage = String
+		        .valueOf(curtPage + 1 > getTotalPage() ? getTotalPage()
+		                : curtPage + 1);
 		String next = template2.replace("{class}", classLinkOn)
-		        .replace("{index}", String.valueOf(curtPage + 1))
-		        .replace("{text}", "下页").replace("{url}", url)
-		        .replace("{clickMethod}", clickMethod);
+		        .replace("{index}", nextPage).replace("{text}", "下页")
+		        .replace("{url}", url).replace("{clickMethod}", clickMethod);
 
 		// 拼接
 		String allHtml;
+		allHtml = first + prev + span + next + last;
 		// System.out.println(curtPage + "," + totalPage + "," + startPage + ","
 		// + endPage);
-		if (curtPage == 1 && curtPage != totalPage)
-		{
-			// 是否首页
-			allHtml = span + next + last;
-		}
-		else if (curtPage != 1 && curtPage == totalPage)
-		{
-			// 是否末页
-			allHtml = first + prev + span;
-		}
-		else if (curtPage == totalPage)
-		{
-			// 既是首页也是末页,总页数=1
-			allHtml = span;
-		}
-		else
-		{
-			// 其他
-			allHtml = first + prev + span + next + last;
-		}
+		// if (curtPage == 1 && curtPage != totalPage)
+		// {
+		// // 是否首页
+		// allHtml = span + next + last;
+		// }
+		// else if (curtPage != 1 && curtPage == totalPage)
+		// {
+		// // 是否末页
+		// allHtml = first + prev + span;
+		// }
+		// else if (curtPage == totalPage)
+		// {
+		// // 既是首页也是末页,总页数=1
+		// allHtml = span;
+		// }
+		// else
+		// {
+		// // 其他
+		// allHtml = first + prev + span + next + last;
+		// }
 
 		String result = template1.replace("{span}", allHtml);
 		if (logger.isDebugEnabled())
@@ -390,15 +400,15 @@ public class Pager<T> extends PageBounds implements Serializable
 	}
 
 	@Print(isPrint = false)
-	public String getHtmlOutput()
+	public String getHtml()
 	{
-		htmlOutput = createHtml();
-		return htmlOutput;
+		html = createHtml();
+		return html;
 	}
 
-	public void setHtmlOutput(String htmlOutput)
+	public void setHtml(String htmlOutput)
 	{
-		this.htmlOutput = htmlOutput;
+		this.html = htmlOutput;
 	}
 
 	public String getTableName()
@@ -503,5 +513,25 @@ public class Pager<T> extends PageBounds implements Serializable
 	public void setClickMethod(String clickMethod)
 	{
 		this.clickMethod = clickMethod;
+	}
+
+	public String getClassLinkOn()
+	{
+		return classLinkOn;
+	}
+
+	public void setClassLinkOn(String classLinkOn)
+	{
+		this.classLinkOn = classLinkOn;
+	}
+
+	public String getClassLinkOff()
+	{
+		return classLinkOff;
+	}
+
+	public void setClassLinkOff(String classLinkOff)
+	{
+		this.classLinkOff = classLinkOff;
 	}
 }

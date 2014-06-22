@@ -92,7 +92,7 @@ public class JavaBeanUtil
 			while (it.hasNext())
 			{
 				Entry entry = (Entry) it.next();
-				String key = (String) entry.getKey();
+				String key = objectToString(entry.getKey());
 				Object value = entry.getValue();
 				String s = key + "=" + toString(value, isShowNull, isPrint)
 				        + ",";
@@ -500,4 +500,21 @@ public class JavaBeanUtil
 		return joinedArray;
 	}
 
+	public static String objectToString(Object obj)
+	{
+		if (obj == null)
+		{
+			return "";
+		}
+		if (obj instanceof String)
+		{
+			return (String) obj;
+		}
+		else if (obj instanceof Integer)
+		{
+			return String.valueOf(obj);
+		}
+
+		return obj.toString();
+	}
 }
