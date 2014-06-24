@@ -111,6 +111,7 @@ public class MybatisSqlGenerator
 		        + " resultType=" + beanName + ">" + newline;
 		sql += "select ";
 
+		String tableAltName = "t";// 表别名
 		String whereAppend = "";
 		for (int i = 0; i < colList.size(); i++)
 		{
@@ -118,13 +119,14 @@ public class MybatisSqlGenerator
 			String name = map.get("name").toLowerCase();
 			String type = map.get("type");
 			type = convertType(type);
+			String newName = tableAltName + "." + name;// 字段前加别名
 			if (i == 0)
 			{
-				sql += name;
+				sql += newName;
 			}
 			else
 			{
-				sql += ", " + name;
+				sql += ", " + newName;
 			}
 
 			if (type.equals(VARCHAR))
@@ -132,7 +134,7 @@ public class MybatisSqlGenerator
 				// 字符型
 				// <if test="id!=null and id!=''"> and id = #{id} </if>
 				whereAppend += "<if test=\"" + name + " != null and " + name
-				        + " != ''\">" + newline + "and " + name + " = #{"
+				        + " != ''\">" + newline + "and " + newName + " = #{"
 				        + name + ",jdbcType=" + type + "}" + newline + "</if>"
 				        + newline;
 			}
@@ -140,11 +142,11 @@ public class MybatisSqlGenerator
 			{
 				// <if test="id!=null"> and id = #{id} </if>
 				whereAppend += "<if test=\"" + name + "!=null\">" + newline
-				        + "and " + name + " = #{" + name + ",jdbcType=" + type
-				        + "}" + newline + "</if>" + newline;
+				        + "and " + newName + " = #{" + name + ",jdbcType="
+				        + type + "}" + newline + "</if>" + newline;
 			}
 		}
-		sql += " from " + tableName + newline;
+		sql += " from " + tableName + " " + tableAltName + newline;
 		sql += "<where>" + newline + whereAppend + "</where>" + newline;
 		sql += "</select>" + newline;
 		return sql;
@@ -267,10 +269,7 @@ public class MybatisSqlGenerator
 		Map<String, String> map = colList.get(0);
 		String name = map.get("name").toLowerCase();
 		String type = map.get("type").toLowerCase();
-		if (type.equals("varchar2"))
-		{
-			type = "varchar";
-		}
+		type = convertType(type);
 		String result = String.format(comment, "delete")
 		        + "<delete id=\"delete\" parameterType=" + beanName + ">"
 		        + newline;
