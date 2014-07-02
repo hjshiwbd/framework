@@ -43,7 +43,14 @@ public class BaseDAOSupportImpl extends SqlSessionDaoSupport implements
 	@Override
 	public <T> List<T> selectList(String mybatisId, Object param)
 	{
-		return getSqlSession().selectList(mybatisId, param);
+		long l1 = System.currentTimeMillis();
+		List<T> list = getSqlSession().selectList(mybatisId, param);
+		long l2 = System.currentTimeMillis();
+		if (logger.isDebugEnabled())
+		{
+			logger.debug("selectList:" + (l2 - l1));
+		}
+		return list;
 	}
 
 	@Override
@@ -105,8 +112,14 @@ public class BaseDAOSupportImpl extends SqlSessionDaoSupport implements
 			                .getOrderby()), pager.isContainsTotalCount());
 
 			// 查列表
+			long l1 = System.currentTimeMillis();
 			List<E> list = getSqlSession().selectList(mybatisId, param,
 			        pageBounds);
+			long l2 = System.currentTimeMillis();
+			if (logger.isDebugEnabled())
+			{
+				logger.debug("select1:" + (l2 - l1));
+			}
 			pager.setPageList(list);
 
 			// 查总行数
