@@ -9,10 +9,13 @@ public class CreateFile
 	public static void main(String[] args) throws Exception
 	{
 		// bean,mapper.xml
-		createFile();
+//		createFile();
 
 		// struct
-//		createStructure();
+		// createStructure();
+		
+		// cols
+		createCols();
 	}
 
 	public static void createFile()
@@ -37,12 +40,6 @@ public class CreateFile
 		mybatis.createMapperFile(true);
 	}
 
-	public static Connection getConn(String dbtype)
-	{
-		return dbtype.equals(MybatisSqlGenerator.DB_TYPE_ORACLE) ? getOracleConn()
-		        : getMysqlConn();
-	}
-
 	public static void createStructure() throws Exception
 	{
 		String templateDir = "F:/github/framework";
@@ -54,6 +51,27 @@ public class CreateFile
 		        pkgModule, pkgMapper, module, author);
 		struct.execute();
 
+	}
+
+	public static void createCols() throws Exception
+	{
+		String dbtype = MybatisSqlGenerator.DB_TYPE_ORACLE;
+		String databaseName = "photo";// 仅用于mysql的colList查询
+		String tableName = "t_menu";
+		String beanFileName = "ImageBean";
+		String packageName = "cn.edu.whut.photo.bean";
+		String mybatisFolder = "F:/svn/mine/weiyun/hjin/project/photo/code/photo/src/config/mybatis";
+		packageName = "cn.edu.whut.photo.mapper.";
+		MybatisSqlGenerator mybatis = new MybatisSqlGenerator(getConn(dbtype),
+		        packageName, databaseName, tableName, beanFileName,
+		        mybatisFolder, MybatisSqlGenerator.DB_TYPE_ORACLE);
+		System.out.println(mybatis.getColWithPrefix("t"));
+	}
+
+	public static Connection getConn(String dbtype)
+	{
+		return dbtype.equals(MybatisSqlGenerator.DB_TYPE_ORACLE) ? getOracleConn()
+		        : getMysqlConn();
 	}
 
 	/**
