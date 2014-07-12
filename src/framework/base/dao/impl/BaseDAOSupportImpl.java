@@ -108,8 +108,9 @@ public class BaseDAOSupportImpl extends SqlSessionDaoSupport implements
 		{
 			// 构建PageBounds查询对象
 			PageBounds pageBounds = new PageBounds(pager.getCurtPage(),
-			        pager.getCountPerPage(), Order.formString(pager
-			                .getOrderby()), pager.isContainsTotalCount());
+			        pager.getCountPerPage(), Order.formString(
+			                pager.getOrderby(), pager.getOrderbyFormat()),
+			        pager.isContainsTotalCount());
 
 			// 查列表
 			long l1 = System.currentTimeMillis();

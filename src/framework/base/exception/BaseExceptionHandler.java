@@ -62,6 +62,8 @@ public class BaseExceptionHandler implements HandlerExceptionResolver
 		{
 			// 一般字符串
 			model.addObject(BaseConstants.CommonPageParam.SHOW_MSG, msg);
+			model.addObject(BaseConstants.CommonPageParam.PAGE_CONTINUE_URL,
+			        "/");
 		}
 
 		// 控制台日志输出

@@ -52,9 +52,16 @@ public class Pager<T> extends PageBounds implements Serializable
 	private String whereStr = "";
 
 	/**
-	 * 排序.ex:String orderby = "id.desc,name";
+	 * 格式:以","或"."分开,不要有空格.<br/>
+	 * ex:String orderby = "id.desc,name";
 	 */
 	private String orderby = "";
+	/**
+	 * improved orderby generation with property "orderby"<br/>
+	 * first "?"->property, second "?"->direction<br/>
+	 * eg:orderby="id.desc", orderbyFormat="t.??"-> "t.id desc"
+	 */
+	private String orderbyFormat = "";
 
 	/**
 	 * 需要返回的列,内层查询时用
@@ -187,7 +194,7 @@ public class Pager<T> extends PageBounds implements Serializable
 		        + countPerPageInput + totalInput + totalPageInput
 		        + "{span}</div>";
 		// 有link
-		String template2 = "<span class=\"{class}\"><a class=\"pageIndex\" pageIndex=\"{index}\" href=\"{url}?curtPage={index}\" onclick=\"{clickMethod}\">{text}</a></span>";
+		String template2 = "<a class=\"pageIndex\" pageIndex=\"{index}\" href=\"{url}?curtPage={index}\" onclick=\"{clickMethod}\">{text}</a>";
 		// 无link
 		String template3 = "<span class=\"{class}\">{text}</span>";
 
@@ -436,6 +443,12 @@ public class Pager<T> extends PageBounds implements Serializable
 		return orderby;
 	}
 
+	/**
+	 * 格式:以","或"."分开,不要有空格.<br/>
+	 * ex:String orderby = "id.desc,name";
+	 * 
+	 * @param orderby
+	 */
 	public void setOrderby(String orderby)
 	{
 		this.orderby = orderby;
@@ -533,5 +546,18 @@ public class Pager<T> extends PageBounds implements Serializable
 	public void setClassLinkOff(String classLinkOff)
 	{
 		this.classLinkOff = classLinkOff;
+	}
+
+	public String getOrderbyFormat()
+	{
+		return orderbyFormat;
+	}
+
+	/**
+	 * {@link #orderbyFormat}
+	 */
+	public void setOrderbyFormat(String orderbyFormat)
+	{
+		this.orderbyFormat = orderbyFormat;
 	}
 }
