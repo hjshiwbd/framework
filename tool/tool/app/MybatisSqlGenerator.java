@@ -155,21 +155,21 @@ public class MybatisSqlGenerator
 	/**
 	 * select t.col1, t.col2 ...
 	 * 
-	 * @param prefixName
+	 * @param prefix
 	 * @return
 	 */
-	public String getColWithPrefix(String prefixName)
+	public String getColWithPrefix(String prefix, String suffix)
 	{
-		String sql = "select ";
+		String sql = "select \r\n";
 		for (int i = 0; i < colList.size(); i++)
 		{
 			Map<String, String> map = colList.get(i);
 			String name = map.get("name").toLowerCase();
-			sql += prefixName + "." + name + ",";
+			sql += prefix + "." + name + " " + suffix + name + ",";
 		}
 
 		sql = sql.substring(0, sql.length() - 1);
-		sql += " from " + tableName;
+		sql += "\r\nfrom " + tableName;
 		return sql;
 	}
 
