@@ -318,7 +318,13 @@ public class CommonUtil
 		return errorInfo.toString();
 	}
 
-	public int getInt(String str)
+	/**
+	 * getInt
+	 * 
+	 * @param str
+	 * @return
+	 */
+	public static int getInt(String str)
 	{
 		String regex = "\\d+";
 		if (str.matches(regex))
