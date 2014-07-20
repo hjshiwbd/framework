@@ -13,6 +13,9 @@ import javax.servlet.http.HttpServletRequest;
 
 import com.googlecode.jsonplugin.JSONException;
 import com.googlecode.jsonplugin.JSONUtil;
+
+import framework.base.exception.BaseException;
+
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.util.ReflectionUtils;
 
@@ -313,6 +316,19 @@ public class CommonUtil
 			errorInfo.append(">>>\t" + sElement.toString() + "\r\n");
 		}
 		return errorInfo.toString();
+	}
+
+	public int getInt(String str)
+	{
+		String regex = "\\d+";
+		if (str.matches(regex))
+		{
+			return Integer.parseInt(str);
+		}
+		else
+		{
+			throw new BaseException("unknows int format:" + str);
+		}
 	}
 
 	public static void main(String[] args)

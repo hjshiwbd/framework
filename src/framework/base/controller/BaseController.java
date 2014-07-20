@@ -83,9 +83,9 @@ public abstract class BaseController implements Serializable
 		ModelAndView m = model != null ? model : new ModelAndView(
 		        PublicCacheUtil.getString(CommonPageParam.GLOBAL_PAGE_RESULT));
 		
-		if (model.getViewName() == null)
+		if (m.getViewName() == null)
 		{
-			model.setViewName(PublicCacheUtil
+			m.setViewName(PublicCacheUtil
 			        .getString(CommonPageParam.GLOBAL_PAGE_RESULT));
 		}
 		
