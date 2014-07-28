@@ -110,6 +110,13 @@ public abstract class BaseController implements Serializable
 	{
 		ModelAndView m = model != null ? model : new ModelAndView(
 		        PublicCacheUtil.getString(CommonPageParam.GLOBAL_PAGE_RESULT));
+
+		if (m.getViewName() == null)
+		{
+			m.setViewName(PublicCacheUtil
+			        .getString(CommonPageParam.GLOBAL_PAGE_RESULT));
+		}
+		
 		m.addObject(BaseConstants.CommonPageParam.PROCESS_RESULT, "0");
 		m.addObject(BaseConstants.CommonPageParam.SHOW_MSG, msg);
 		m.addObject(BaseConstants.CommonPageParam.PAGE_CONTINUE_URL,
