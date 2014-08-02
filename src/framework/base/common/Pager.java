@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import com.github.miemiedev.mybatis.paginator.domain.PageBounds;
 
 import framework.base.annotation.Print;
+import framework.base.utils.CommonUtil;
 
 /**
  * 分页类.继承mybatis.RowBounds类,配合mybatis-pager.jar,实现分页功能
@@ -114,6 +115,10 @@ public class Pager<T> extends PageBounds implements Serializable
 	 */
 	private String url = "#";
 	/**
+	 * 翻页请求的url参数
+	 */
+	private String urlQueryString = "";
+	/**
 	 * 翻页按钮的点击事件方法名
 	 */
 	private String clickMethod = "";
@@ -194,7 +199,7 @@ public class Pager<T> extends PageBounds implements Serializable
 		        + countPerPageInput + totalInput + totalPageInput
 		        + "{span}</div>";
 		// 有link
-		String template2 = "<a class=\"pageIndex\" pageIndex=\"{index}\" href=\"{url}?curtPage={index}\" onclick=\"{clickMethod}\">{text}</a>";
+		String template2 = "<a class=\"pageIndex\" pageIndex=\"{index}\" href=\"{url}?{urlQueryString}\" onclick=\"{clickMethod}\">{text}</a>";
 		// 无link
 		String template3 = "<span class=\"{class}\">{text}</span>";
 
@@ -220,9 +225,10 @@ public class Pager<T> extends PageBounds implements Serializable
 			if (i != curtPage)
 			{
 				span += template2.replace("{class}", classLinkOn)
-				        .replace("{index}", i + "").replace("{text}", i + "")
-				        .replace("{url}", url)
-				        .replace("{clickMethod}", clickMethod);
+				        .replace("{text}", i + "").replace("{url}", url)
+				        .replace("{clickMethod}", clickMethod)
+				        .replace("{urlQueryString}", getUrlQueryString())
+				        .replace("{index}", i + "");
 			}
 			else
 			{
@@ -234,25 +240,33 @@ public class Pager<T> extends PageBounds implements Serializable
 
 		// 首页
 		String first = template2.replace("{class}", classLinkOn)
-		        .replace("{index}", 1 + "").replace("{text}", "首页")
-		        .replace("{url}", url).replace("{clickMethod}", clickMethod);
+		        .replace("{text}", "首页").replace("{url}", url)
+		        .replace("{clickMethod}", clickMethod)
+		        .replace("{urlQueryString}", getUrlQueryString())
+		        .replace("{index}", 1 + "");
 		// 末页
 		String last = template2.replace("{class}", classLinkOn)
-		        .replace("{index}", totalPage + "").replace("{text}", "末页")
-		        .replace("{url}", url).replace("{clickMethod}", clickMethod);
+		        .replace("{text}", "末页").replace("{url}", url)
+		        .replace("{clickMethod}", clickMethod)
+		        .replace("{urlQueryString}", getUrlQueryString())
+		        .replace("{index}", totalPage + "");
 		// 上一页
 		String prevPage = String
 		        .valueOf(curtPage - 1 == 0 ? "1" : curtPage - 1);
 		String prev = template2.replace("{class}", classLinkOn)
-		        .replace("{index}", prevPage).replace("{text}", "上页")
-		        .replace("{url}", url).replace("{clickMethod}", clickMethod);
+		        .replace("{text}", "上页").replace("{url}", url)
+		        .replace("{clickMethod}", clickMethod)
+		        .replace("{urlQueryString}", getUrlQueryString())
+		        .replace("{index}", prevPage);
 		// 下一页
 		String nextPage = String
 		        .valueOf(curtPage + 1 > getTotalPage() ? getTotalPage()
 		                : curtPage + 1);
 		String next = template2.replace("{class}", classLinkOn)
-		        .replace("{index}", nextPage).replace("{text}", "下页")
-		        .replace("{url}", url).replace("{clickMethod}", clickMethod);
+		        .replace("{text}", "下页").replace("{url}", url)
+		        .replace("{clickMethod}", clickMethod)
+		        .replace("{urlQueryString}", getUrlQueryString())
+		        .replace("{index}", nextPage);
 
 		// 拼接
 		String allHtml;
@@ -560,4 +574,34 @@ public class Pager<T> extends PageBounds implements Serializable
 	{
 		this.orderbyFormat = orderbyFormat;
 	}
+
+	public String getUrlQueryString()
+	{
+		if (CommonUtil.null2Empty(urlQueryString).equals(""))
+		{
+			return "curtPage={index}";
+		}
+		else
+		{
+			if (urlQueryString.charAt(0) == '&')
+			{
+				urlQueryString = urlQueryString.substring(1);
+			}
+
+			if (urlQueryString.indexOf("curtPage=") == -1)
+			{
+				return "&curtPage={index}&" + urlQueryString;
+			}
+			else
+			{
+				return "&" + urlQueryString;
+			}
+		}
+	}
+
+	public void setUrlQueryString(String urlQueryString)
+	{
+		this.urlQueryString = urlQueryString;
+	}
+
 }
