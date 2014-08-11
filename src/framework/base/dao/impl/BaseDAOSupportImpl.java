@@ -81,7 +81,7 @@ public class BaseDAOSupportImpl extends SqlSessionDaoSupport implements
 	@Override
 	public int selectCount(String table, String where, Object... param)
 	{
-		String sql = "select count(1) from " + table + where;
+		String sql = "select count(1) from " + table + " " + where;
 		if (logger.isDebugEnabled())
 		{
 			logger.debug("select count sql:" + sql);
