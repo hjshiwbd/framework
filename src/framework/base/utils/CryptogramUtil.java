@@ -36,11 +36,6 @@ public class CryptogramUtil
 	{
 		try
 		{
-			// String key1 = "舒三民秦建武黄琎常强方亮李坤永远是兄弟";
-			// // md5加密
-			// key1 = CommonUtil.encryptToMD5(key1);
-			// System.out.println("########" + key1);
-
 			key = "F9A1D52C6CDF1E0A";
 
 			kgen = KeyGenerator.getInstance("AES");
