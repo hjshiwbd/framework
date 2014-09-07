@@ -111,4 +111,13 @@ public class StringUtil
 		}
 		return content;
 	}
+
+	public static String objectToString(Object object)
+	{
+		if (object == null)
+		{
+			return "";
+		}
+		return object.toString();
+	}
 }
