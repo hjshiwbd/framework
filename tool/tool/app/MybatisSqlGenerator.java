@@ -267,7 +267,7 @@ public class MybatisSqlGenerator
 			}
 			else
 			{
-				String s = "<if test=\"" + name + "!=null\">" + newline + ""
+				String s = "<if test=\"" + name + " != null\">" + newline + ""
 				        + name + " = #{" + name + ",jdbcType=" + type + "},"
 				        + newline + "</if>" + newline;
 				colstr += s;
