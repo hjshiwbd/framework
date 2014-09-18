@@ -5,26 +5,44 @@ import java.util.Map;
 
 public class ConvertUtil
 {
-    public static <T> T mapToObject(Map<String, Object> map, Class<T> cls)
-    {
-        if (map == null)
-        {
-            return null;
-        }
+	public static String objToString(Object obj)
+	{
+		if (obj == null)
+		{
+			return null;
+		}
+		return obj.toString();
+	}
 
-        T obj = (T) ReflectUtil.newInstance(cls.getName());
+	/**
+	 * 根据key反射value到obj中
+	 * 
+	 * @param map
+	 * @param cls
+	 * @return
+	 * @author hjin
+	 */
+	@SuppressWarnings("unchecked")
+	public static <T> T mapToObject(Map<String, Object> map, Class<T> cls)
+	{
+		if (map == null)
+		{
+			return null;
+		}
 
-        Iterator<Map.Entry<String, Object>> it = map.entrySet().iterator();
-        while (it.hasNext())
-        {
-            Map.Entry<String, Object> en = it.next();
-            String key = en.getKey();
-            Object o = en.getValue();
+		T obj = (T) ReflectUtil.newInstance(cls.getName());
 
-            ReflectUtil.invokeSetMethod(obj, key, o);
-        }
+		Iterator<Map.Entry<String, Object>> it = map.entrySet().iterator();
+		while (it.hasNext())
+		{
+			Map.Entry<String, Object> en = it.next();
+			String key = en.getKey();
+			Object o = en.getValue();
 
-        return obj;
-    }
+			ReflectUtil.invokeSetMethod(obj, key, o);
+		}
+
+		return obj;
+	}
 
 }

@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
@@ -13,6 +14,7 @@ import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
@@ -46,7 +48,7 @@ public class UrlUtil
 		try
 		{
 			HttpGet httpGet = new HttpGet(url);
-			logger.info("get url:" + url);
+			logger.debug("get url:" + url);
 			SimpleResponseHandler responseHandler = new SimpleResponseHandler(
 			        encoding);
 			responseBody = httpclient.execute(httpGet, responseHandler);
@@ -73,43 +75,61 @@ public class UrlUtil
 		return responseBody;
 	}
 
-	/**
-	 * 执行post方法
-	 * 
-	 * @author hjin
-	 * @cratedate 2013-11-4 上午8:47:18
-	 * @param url
-	 * @param postParams
-	 * @param encoding
-	 * @return
-	 * 
-	 */
 	public static String post(String url, List<NameValuePair> postParams,
 	        String encoding)
+	{
+		return post(url, postParams, null, encoding);
+	}
+
+	public static String post(String url, String postString, String encoding)
+	{
+		return post(url, null, postString, encoding);
+	}
+
+	/**
+	 * 提交post请求
+	 * 
+	 * @param url
+	 *            请求地址
+	 * @param postParams
+	 *            请求参数
+	 * @param postString
+	 *            POST内置字符串
+	 * @param encoding
+	 *            字符集
+	 * @return
+	 * @author hjin
+	 */
+	public static String post(String url, List<NameValuePair> postParams,
+	        String postString, String encoding)
 	{
 		String responseBody = null;
 		CloseableHttpClient httpclient = HttpClients.createDefault();
 		try
 		{
 			HttpPost httpPost = new HttpPost(url);
+
 			if (postParams != null)
 			{
-		        httpPost.setEntity(new UrlEncodedFormEntity(postParams));
+				httpPost.setEntity(new UrlEncodedFormEntity(postParams,
+				        encoding));
 			}
-//			logger.info("post url:" + url);
-//			logger.info("post param:" + postParams);
-//			SimpleResponseHandler responseHandler = new SimpleResponseHandler(
-//			        encoding);
-//			responseBody = httpclient.execute(httpPost, responseHandler);
 
-	        CloseableHttpResponse response = httpclient.execute(httpPost);
+			if (!StringUtils.isEmpty(postString))
+			{
+				StringEntity s = new StringEntity(postString, encoding);
+				s.setContentEncoding(encoding);
+				s.setContentType("application/json;charset=" + encoding);
+				httpPost.setEntity(s);
+			}
 
-	        HttpEntity entity = response.getEntity();
-	        responseBody = EntityUtils.toString(entity, encoding).trim();
-	        // 关闭连接
-	        EntityUtils.consume(entity);
+			CloseableHttpResponse response = httpclient.execute(httpPost);
+			HttpEntity entity = response.getEntity();
+			responseBody = EntityUtils.toString(entity, encoding).trim();
+			// 关闭连接
+			EntityUtils.consume(entity);
 
-	        response.close();
+			response.close();
 		}
 		catch (UnsupportedEncodingException e)
 		{
@@ -172,7 +192,8 @@ public class UrlUtil
 			if (status >= 200 && status < 300)
 			{
 				HttpEntity entity = response.getEntity();
-				return entity != null ? EntityUtils.toString(entity) : null;
+				return entity != null ? EntityUtils.toString(entity, encoding)
+				        : null;
 			}
 			else
 			{
