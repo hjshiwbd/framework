@@ -24,14 +24,11 @@ public class BaseException extends RuntimeException
 	public BaseException(String msg)
 	{
 		super(msg);
-		logger.error(getStackTrace()[1].getMethodName() + ": 出现异常!错误原因:" + msg);
 	}
 
 	public BaseException(Object className, Throwable cause)
 	{
 		super(className.toString(), cause);
-		logger.error(cause.getStackTrace()[0].getMethodName() + ": 出现异常!错误原因:"
-		        + cause.getMessage());
 	}
 
 	public BaseException(Exception e)

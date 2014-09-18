@@ -1,5 +1,6 @@
 package framework.base.exception;
 
+import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
@@ -7,6 +8,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -14,6 +16,7 @@ import com.googlecode.jsonplugin.JSONUtil;
 
 import framework.base.common.BaseConstants;
 import framework.base.common.BaseConstants.CommonPageParam;
+import framework.base.utils.ExceptionUtil;
 import framework.base.utils.PublicCacheUtil;
 
 /**
@@ -27,11 +30,29 @@ public class BaseExceptionHandler implements HandlerExceptionResolver
 {
 	private Logger logger = LoggerFactory.getLogger(getClass());
 
+	private List<IExceptionResolver> resolvers;
+	public void setResolvers(List<IExceptionResolver> resolvers)
+    {
+	    this.resolvers = resolvers;
+    }
+
+	@ResponseBody
 	@SuppressWarnings("rawtypes")
 	public ModelAndView resolveException(HttpServletRequest request,
 	        HttpServletResponse response, Object handler, Exception ex)
 	{
 		ModelAndView model = new ModelAndView();
+
+		String exClassName = ex.getClass().getName();
+		for (IExceptionResolver resolver : resolvers)
+		{
+			if (exClassName.equals(resolver.getExceptionClass()))
+			{
+				ModelAndView m =resolver
+				        .resolveException(request, response, handler, ex); 
+				return m;
+			}
+		}
 
 		// 处理异常内容
 		String msg = ex.getMessage();
@@ -61,24 +82,15 @@ public class BaseExceptionHandler implements HandlerExceptionResolver
 		else
 		{
 			// 一般字符串
-			model.addObject(BaseConstants.CommonPageParam.SHOW_MSG, msg);
-			model.addObject(BaseConstants.CommonPageParam.PAGE_CONTINUE_URL,
-			        "/");
+			model.addObject(BaseConstants.CommonPageParam.HIDDEN_MSG, msg);
+			model.addObject(BaseConstants.CommonPageParam.SHOW_MSG, "操作失败");
 		}
 
 		// 控制台日志输出
 		ex.printStackTrace();
 
 		// 文件日志输出
-		StackTraceElement[] stackTraceElement = ex.getStackTrace();
-		StringBuffer errorInfo = new StringBuffer("errorStack:\r\n" + ">>>\t"
-		        + ex.getClass().getName() + " " + ex.getMessage() + "\r\n");
-		for (int i = 0; i < stackTraceElement.length; i++)
-		{
-			StackTraceElement sElement = stackTraceElement[i];
-			errorInfo.append(">>>\t" + sElement.toString() + "\r\n");
-		}
-		logger.error(errorInfo.toString());
+		logger.error(ExceptionUtil.formatExString(ex));
 
 		model.setViewName(PublicCacheUtil
 		        .getString(CommonPageParam.GLOBAL_PAGE_RESULT));

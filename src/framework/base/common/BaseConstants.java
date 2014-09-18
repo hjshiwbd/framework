@@ -39,6 +39,10 @@ public class BaseConstants
 		 */
 		public static final String SHOW_MSG = "showMsg";
 		/**
+		 * 结果页面隐藏内容
+		 */
+		public static final String HIDDEN_MSG = "hiddenMsg";
+		/**
 		 * 结果页面的后续跳转地址
 		 */
 		public static final String PAGE_CONTINUE_URL = "pageContinueUrl";
