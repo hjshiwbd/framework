@@ -44,15 +44,18 @@ public class BaseExceptionHandler implements HandlerExceptionResolver
 		ModelAndView model = new ModelAndView();
 
 		String exClassName = ex.getClass().getName();
-		for (IExceptionResolver resolver : resolvers)
-		{
-			if (exClassName.equals(resolver.getExceptionClass()))
+		if (resolvers!=null)
+        {
+			for (IExceptionResolver resolver : resolvers)
 			{
-				ModelAndView m =resolver
-				        .resolveException(request, response, handler, ex); 
-				return m;
-			}
-		}
+				if (exClassName.equals(resolver.getExceptionClass()))
+				{
+					ModelAndView m =resolver
+					        .resolveException(request, response, handler, ex); 
+					return m;
+				}
+			}   
+        }
 
 		// 处理异常内容
 		String msg = ex.getMessage();

@@ -4,7 +4,6 @@ import java.sql.Connection;
 import java.util.List;
 import java.util.Map;
 
-import tool.app.MybatisSqlGenerator;
 import tool.utils.ConnUtils;
 import tool.utils.DBUtils;
 import tool.utils.IOUtils;
@@ -29,7 +28,7 @@ public class CreateJavaBeanFile
 
 	public static void main(String[] args)
 	{
-		
+
 	}
 
 	/**
@@ -72,11 +71,15 @@ public class CreateJavaBeanFile
 		// 用于输出的文本
 		StringBuffer out = new StringBuffer("package ");
 		out.append(packageName).append(";\r\n\r\n")
-		        .append("import framework.base.bean.BaseBean;")
+		        .append("import com.synjones.base.bean.BaseSerializableBean;")
 		        .append("\r\n\r\n");
+
+		// 注解
+		out.append("@SuppressWarnings(\"serial\")\r\n");
 		// 类名
-		out.append("public class " + beanFileName + " extends BaseBean")
-		        .append(" {\r\n");
+		out.append(
+		        "public class " + beanFileName
+		                + " implements BaseSerializableBean").append(" {\r\n");
 
 		// 属性名输出文本
 		StringBuffer fieldOut = new StringBuffer();

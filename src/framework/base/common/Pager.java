@@ -119,10 +119,6 @@ public class Pager<T> extends PageBounds implements Serializable
 	 */
 	private String urlQueryString = "";
 	/**
-	 * 翻页按钮的点击事件方法名
-	 */
-	private String clickMethod = "";
-	/**
 	 * 生成html串
 	 */
 	private String html;
@@ -199,12 +195,12 @@ public class Pager<T> extends PageBounds implements Serializable
 		        + countPerPageInput + totalInput + totalPageInput
 		        + "{span}</div>";
 		// 有link
-		String template2 = "<a class=\"pageIndex\" pageIndex=\"{index}\" href=\"{url}?{urlQueryString}\" onclick=\"{clickMethod}\">{text}</a>";
+		String template2 = "<a class=\"pageIndex\" pageIndex=\"{index}\" href=\"{url}\">{text}</a>";
 		// 无link
 		String template3 = "<span class=\"{class}\">{text}</span>";
 
 		// 翻页链接
-		url = url == null ? "#" : url;
+		url = url.equals("#") ? "#" : url + "?" + getUrlQueryString();
 
 		// 所有页码的html
 		String span = "";
@@ -226,8 +222,6 @@ public class Pager<T> extends PageBounds implements Serializable
 			{
 				span += template2.replace("{class}", classLinkOn)
 				        .replace("{text}", i + "").replace("{url}", url)
-				        .replace("{clickMethod}", clickMethod)
-				        .replace("{urlQueryString}", getUrlQueryString())
 				        .replace("{index}", i + "");
 			}
 			else
@@ -241,22 +235,16 @@ public class Pager<T> extends PageBounds implements Serializable
 		// 首页
 		String first = template2.replace("{class}", classLinkOn)
 		        .replace("{text}", "首页").replace("{url}", url)
-		        .replace("{clickMethod}", clickMethod)
-		        .replace("{urlQueryString}", getUrlQueryString())
 		        .replace("{index}", 1 + "");
 		// 末页
 		String last = template2.replace("{class}", classLinkOn)
 		        .replace("{text}", "末页").replace("{url}", url)
-		        .replace("{clickMethod}", clickMethod)
-		        .replace("{urlQueryString}", getUrlQueryString())
 		        .replace("{index}", totalPage + "");
 		// 上一页
 		String prevPage = String
 		        .valueOf(curtPage - 1 == 0 ? "1" : curtPage - 1);
 		String prev = template2.replace("{class}", classLinkOn)
 		        .replace("{text}", "上页").replace("{url}", url)
-		        .replace("{clickMethod}", clickMethod)
-		        .replace("{urlQueryString}", getUrlQueryString())
 		        .replace("{index}", prevPage);
 		// 下一页
 		String nextPage = String
@@ -264,8 +252,6 @@ public class Pager<T> extends PageBounds implements Serializable
 		                : curtPage + 1);
 		String next = template2.replace("{class}", classLinkOn)
 		        .replace("{text}", "下页").replace("{url}", url)
-		        .replace("{clickMethod}", clickMethod)
-		        .replace("{urlQueryString}", getUrlQueryString())
 		        .replace("{index}", nextPage);
 
 		// 拼接
@@ -532,16 +518,6 @@ public class Pager<T> extends PageBounds implements Serializable
 		this.url = url;
 	}
 
-	public String getClickMethod()
-	{
-		return clickMethod;
-	}
-
-	public void setClickMethod(String clickMethod)
-	{
-		this.clickMethod = clickMethod;
-	}
-
 	public String getClassLinkOn()
 	{
 		return classLinkOn;
@@ -577,24 +553,25 @@ public class Pager<T> extends PageBounds implements Serializable
 
 	public String getUrlQueryString()
 	{
-		if (CommonUtil.null2Empty(urlQueryString).equals(""))
+		if (CommonUtil.null2Empty(url).equals("#"))
 		{
-			return "curtPage={index}";
+			// url为#表示要用js控制跳转,不在使用urlQueryString参数
+			return "";
 		}
 		else
 		{
-			if (urlQueryString.charAt(0) == '&')
+			// 开启urlQueryString的使用
+			if (CommonUtil.null2Empty(urlQueryString).equals(""))
 			{
-				urlQueryString = urlQueryString.substring(1);
-			}
-
-			if (urlQueryString.indexOf("curtPage=") == -1)
-			{
-				return "&curtPage={index}&" + urlQueryString;
+				return "curtPage={index}";
 			}
 			else
 			{
-				return "&" + urlQueryString;
+				if (urlQueryString.charAt(0) == '&')
+				{
+					urlQueryString = urlQueryString.substring(1);
+				}
+				return urlQueryString + "&curtPage={index}";
 			}
 		}
 	}
