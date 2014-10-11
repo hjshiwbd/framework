@@ -36,6 +36,10 @@ public class DBUtils
 			{
 				Map<String, String> map = new HashMap<String, String>();
 				String name = rs.getString(1);
+				if (name.startsWith("SYNJONES_"))
+                {
+	                continue;
+                }
 				String type = rs.getString(2);
 				String comment = rs.getString(3);
 				comment = comment == null ? "" : comment;
