@@ -101,6 +101,10 @@ public class StringUtil
 
 	public static String htmlStringHandle(String content)
 	{
+		if (StringUtils.isBlank(content))
+        {
+	        return "";
+        }
 		String[] arr1 = { "<", ">", "\r\n", "\n", "&" };
 		String[] arr2 = { "&lt;", "&gt;", "<br/>", "<br/>", "&amp;" };
 		for (int i = 0; i < arr1.length; i++)

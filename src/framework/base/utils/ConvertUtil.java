@@ -1,7 +1,10 @@
 package framework.base.utils;
 
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+
+import framework.base.common.Pager;
 
 public class ConvertUtil
 {
@@ -43,6 +46,25 @@ public class ConvertUtil
 		}
 
 		return obj;
+	}
+
+	/**
+	 * 转化分页格式，返回map
+	 * 
+	 * @author tonglin
+	 * @param pager
+	 * @return
+	 * @throws Exception
+	 * @cratedate: 2012-11-1 下午2:33:38
+	 */
+	public static Map<String, Object> pageToMap(Pager<? extends Object> pager)
+	{
+		Map<String, Object> pageMap = new HashMap<String, Object>();
+		// 总条数
+		pageMap.put("total", pager.getTotal());
+		// 行数据
+		pageMap.put("rows", pager.getPageList());
+		return pageMap;
 	}
 
 }
