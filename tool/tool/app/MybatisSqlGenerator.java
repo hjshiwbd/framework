@@ -153,9 +153,10 @@ public class MybatisSqlGenerator
 	}
 
 	/**
-	 * select t.col1, t.col2 ...
+	 * select {prefix}.col1 {suffix}col1, {prefix}.col2 {suffix}col2 ...
 	 * 
 	 * @param prefix
+	 * @param suffix
 	 * @return
 	 */
 	public String getColWithPrefix(String prefix, String suffix)

@@ -1,6 +1,5 @@
 package framework.base.utils;
 
-import java.util.Date;
 import java.util.Properties;
 
 import javax.mail.Message;
@@ -75,8 +74,6 @@ public class MailUtil
 		// message.setText(str_content); //发送文本邮件 //你好吗？
 		message.setContent(content, "text/html;charset=gbk"); // 发送HTML邮件
 		// //<b>你好</b><br><p>大家好</p>
-		// 设置发信时间
-		message.setSentDate(new Date(new Date().getTime() - 1000000));
 
 		// 存储邮件信息
 		message.saveChanges();
